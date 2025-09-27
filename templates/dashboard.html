@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enterprise VM Placement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-speedometer2 me-2"></i>Enterprise Dashboard
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-primary" onclick="refreshDashboard()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card success">
+            <h2 id="total-placements">{{ system_stats.total_placements }}</h2>
+            <p><i class="bi bi-cloud-upload me-1"></i>Total Placements</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card info">
+            <h2 id="success-rate">{{ "%.0f"|format(system_stats.success_rate) }}%</h2>
+            <p><i class="bi bi-check-circle me-1"></i>Success Rate</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card warning">
+            <h2 id="compliance-score">{{ "%.3f"|format(system_stats.avg_compliance_score) }}</h2>
+            <p><i class="bi bi-shield-check me-1"></i>Avg Compliance Score</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card danger">
+            <h2 id="active-tenants">{{ system_stats.active_tenants }}</h2>
+            <p><i class="bi bi-people me-1"></i>Active Tenants</p>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-pie-chart me-2"></i>Resource Allocation</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="resourceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-graph-up me-2"></i>Host Utilization</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="utilizationChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Overview Row -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-activity me-2"></i>Recent Placements</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_placements %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>VM ID</th>
+                                <th>Tenant</th>
+                                <th>Resources</th>
+                                <th>Host</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for placement in recent_placements %}
+                            <tr>
+                                <td><code>{{ placement.vm_request.vm_id }}</code></td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ placement.vm_request.tenant_id }}</span>
+                                </td>
+                                <td>
+                                    {{ placement.vm_request.cpu_required }}C / {{ placement.vm_request.ram_required }}GB
+                                </td>
+                                <td>
+                                    {% if placement.result.success %}
+                                        <span class="badge bg-primary">Host {{ placement.result.host_id }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if placement.result.success %}
+                                        <span class="status-badge status-active">
+                                            <i class="bi bi-check-circle me-1"></i>Success
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">
+                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted">
+                                    {{ placement.timestamp.split('T')[1].split('.')[0] if '.' in placement.timestamp else placement.timestamp.split('T')[1] }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No recent placements</p>
+                    <a href="/demo" class="btn btn-outline-primary">
+                        <i class="bi bi-play-circle me-1"></i>Run Demo
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-people me-2"></i>Tenant Overview</h5>
+            </div>
+            <div class="card-body">
+                {% if tenant_summaries %}
+                    {% for tenant_id, summary in tenant_summaries.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <h6 class="mb-1">{{ summary.tenant_name }}</h6>
+                            <small class="text-muted">
+                                {{ summary.usage_summary.vm_count }} VMs • 
+                                {{ summary.usage_summary.total_cpu }} CPU • 
+                                {{ summary.usage_summary.total_ram }} GB RAM
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            {% if summary.cost_status == 'within_budget' %}
+                                <span class="status-badge status-active">✓</span>
+                            {% elif summary.cost_status == 'approaching_limit' %}
+                                <span class="status-badge status-warning">⚠</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">⚠</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-people" style="font-size: 1.5rem;"></i>
+                    <p class="mt-2 mb-0">No active tenants</p>
+                </div>
+                {% endif %}
+                
+                <div class="d-grid">
+                    <a href="/tenants" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>View All Tenants
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-cpu me-2"></i>System Health</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Active Hosts</span>
+                        <span><strong>{{ active_hosts }} / {{ total_hosts }}</strong></span>
+                    </div>
+                    <div class="progress mt-1">
+                        <div class="progress-bar" style="width: {{ (active_hosts / total_hosts * 100) if total_hosts > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>CPU Allocated</span>
+                        <span><strong>{{ system_stats.total_resources_allocated.cpu }} cores</strong></span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>RAM Allocated</span>
+                        <span><strong>{{ system_stats.total_resources_allocated.ram }} GB</strong></span>
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="/hosts" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-server me-1"></i>Host Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="dashboard-loading" class="loading">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Refreshing dashboard...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize charts
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // Resource Allocation Pie Chart
+    const resourceCtx = document.getElementById('resourceChart').getContext('2d');
+    new Chart(resourceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['CPU Cores', 'RAM (GB)'],
+            datasets: [{
+                data: [{{ system_stats.total_resources_allocated.cpu }}, {{ system_stats.total_resources_allocated.ram }}],
+                backgroundColor: [
+                    'rgba(46, 139, 87, 0.8)',
+                    'rgba(52, 152, 219, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Host Utilization Chart - we'll update this with real data
+    fetchHostUtilization();
+}
+
+function fetchHostUtilization() {
+    fetch('/api/system_status')
+        .then(response => response.json())
+        .then(data => {
+            const utilizationCtx = document.getElementById('utilizationChart').getContext('2d');
+            
+            // Prepare data for top 10 hosts
+            const hostData = data.host_utilizations.slice(0, 10);
+            const labels = hostData.map(h => `Host ${h.host_id}`);
+            const cpuData = hostData.map(h => h.cpu_utilization);
+            const ramData = hostData.map(h => h.ram_utilization);
+            
+            new Chart(utilizationCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'CPU %',
+                            data: cpuData,
+                            backgroundColor: 'rgba(46, 139, 87, 0.8)',
+                            borderColor: 'rgba(46, 139, 87, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'RAM %',
+                            data: ramData,
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.log('Error fetching host utilization:', error));
+}
+
+function refreshDashboard() {
+    showLoading('dashboard-loading');
+    
+    fetch('/api/system_status')
+        .then(response => response.json())
+        .then(data => {
+            updateMetrics(data.system_stats);
+            
+            // Refresh page after a short delay to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error refreshing dashboard:', error);
+            hideLoading('dashboard-loading');
+        });
+}
+
+// Auto-refresh every 2 minutes
+setInterval(function() {
+    fetch('/api/system_status')
+        .then(response => response.json())
+        .then(data => {
+            updateMetrics(data.system_stats);
+        })
+        .catch(error => console.log('Auto-refresh error:', error));
+}, 120000);
+</script>
+{% endblock %}

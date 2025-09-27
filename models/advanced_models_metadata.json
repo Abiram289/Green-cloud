@@ -1,0 +1,111 @@
+{
+  "feature_columns": [
+    "vm_cpu_required",
+    "vm_ram_required",
+    "vm_runtime_hours",
+    "vm_sla_requirement",
+    "vm_priority_low",
+    "vm_priority_medium",
+    "vm_priority_high",
+    "host_id",
+    "host_cpu_cores",
+    "host_ram_gb",
+    "host_base_power",
+    "host_cost_per_hour",
+    "host_current_cpu_util",
+    "host_current_ram_util",
+    "host_sla_risk",
+    "cpu_util_after_placement",
+    "ram_util_after_placement",
+    "available_cpu_ratio",
+    "available_ram_ratio",
+    "energy_consumption",
+    "cost",
+    "cpu_utilization",
+    "ram_utilization",
+    "sla_violation_risk",
+    "cpu_efficiency_quadratic",
+    "ram_efficiency_quadratic",
+    "resource_balance_score",
+    "total_utilization",
+    "utilization_product",
+    "cost_efficiency",
+    "energy_efficiency",
+    "cost_energy_ratio",
+    "host_total_capacity",
+    "host_load_density",
+    "remaining_capacity",
+    "vm_resource_intensity",
+    "vm_total_demand",
+    "sla_safety_margin",
+    "risk_adjusted_efficiency",
+    "cpu_to_ram_ratio",
+    "host_cpu_to_ram_ratio",
+    "resource_match_score",
+    "energy_cost_composite",
+    "utilization_composite",
+    "cpu_util_after_placement_squared",
+    "cpu_util_after_placement_cubed",
+    "ram_util_after_placement_squared",
+    "ram_util_after_placement_cubed",
+    "host_load_density_squared",
+    "host_load_density_cubed"
+  ],
+  "best_model_name": "VotingClassifier_Soft",
+  "best_model_accuracy": 0.9802551640340219,
+  "best_model_f1": 0.8307291666666666,
+  "model_comparison": {
+    "XGBoost": {
+      "accuracy": 0.9788882138517618,
+      "f1": 0.8154050464807437
+    },
+    "RandomForest": {
+      "accuracy": 0.9787363304981774,
+      "f1": 0.8128342245989305
+    },
+    "ExtraTrees": {
+      "accuracy": 0.9794957472660997,
+      "f1": 0.8335388409371147
+    },
+    "GradientBoosting": {
+      "accuracy": 0.9794957472660997,
+      "f1": 0.8211920529801324
+    },
+    "MLP": {
+      "accuracy": 0.9682563791008505,
+      "f1": 0.7282184655396619
+    },
+    "VotingClassifier_Soft": {
+      "accuracy": 0.9802551640340219,
+      "f1": 0.8307291666666666
+    },
+    "VotingClassifier_Hard": {
+      "accuracy": 0.9802551640340219,
+      "f1": 0.8311688311688312
+    },
+    "Specialized_energy_efficient": {
+      "accuracy": 0.9277035236938032,
+      "f1": 0.02857142857142857
+    },
+    "Specialized_cost_efficient": {
+      "accuracy": 0.9287667071688943,
+      "f1": 0.020876826722338204
+    },
+    "Specialized_cpu_optimal": {
+      "accuracy": 0.9365127582017011,
+      "f1": 0.009478672985781991
+    },
+    "Specialized_ram_optimal": {
+      "accuracy": 0.9366646415552855,
+      "f1": 0.0234192037470726
+    },
+    "Specialized_sla_safe": {
+      "accuracy": 0.929678007290401,
+      "f1": 0.021141649048625793
+    },
+    "Specialized_balanced": {
+      "accuracy": 0.9384872417982989,
+      "f1": 0.0
+    }
+  }
+}

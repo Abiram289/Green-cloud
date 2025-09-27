@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Enterprise VM Placement{% endblock %}
+
+{% block content %}
+<div class="container-fluid text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body py-5">
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 5rem;"></i>
+                    <h1 class="display-6 mt-4 mb-3">Oops! Something went wrong</h1>
+                    <p class="lead text-muted mb-4">
+                        {{ error if error else "An unexpected error occurred while processing your request." }}
+                    </p>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-house me-1"></i>Go Home
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                            <i class="bi bi-arrow-left me-1"></i>Go Back
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Retry
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-top">
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            If this problem persists, please contact the system administrator.
+                        </p>
+                        <small class="text-muted">
+                            Error occurred at {{ moment().format('YYYY-MM-DD HH:mm:ss') if moment else '' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

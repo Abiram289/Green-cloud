@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Tenant Management - Enterprise VM Placement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-people me-2"></i>Tenant Management
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-outline-primary me-2">
+            <i class="bi bi-plus me-1"></i>Add Tenant
+        </button>
+        <button type="button" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Tenant Overview Cards -->
+<div class="row mb-4">
+    {% for tenant_id, tenant in tenants.items() %}
+    <div class="col-lg-6 col-xl-4">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">{{ tenant.name }}</h6>
+                {% if tenant.type == 'standard' %}
+                    <span class="badge bg-primary">{{ tenant.type|title }}</span>
+                {% elif tenant.type == 'enhanced' %}
+                    <span class="badge bg-warning">{{ tenant.type|title }}</span>
+                {% elif tenant.type == 'dedicated' %}
+                    <span class="badge bg-danger">{{ tenant.type|title }}</span>
+                {% elif tenant.type == 'government' %}
+                    <span class="badge bg-success">{{ tenant.type|title }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <small class="text-muted">Total Placements</small>
+                        <div class="fw-bold">{{ tenant_stats[tenant_id].total_placements }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Success Rate</small>
+                        <div class="fw-bold text-success">{{ "%.1f"|format(tenant_stats[tenant_id].success_rate) }}%</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <small class="text-muted">Cost Efficiency</small>
+                        <div class="fw-bold text-info">{{ "%.1f"|format(tenant_stats[tenant_id].avg_cost_efficiency) }}%</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Compliance</small>
+                        <div class="fw-bold text-warning">{{ "%.1f"|format(tenant_stats[tenant_id].compliance_score) }}%</div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Budget Status</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${{ "{:,}"|format(tenant.current_usage) }}</span>
+                        <span class="text-muted">/ ${{ "{:,}"|format(tenant.budget_limit) }}</span>
+                    </div>
+                    <div class="progress mt-1">
+                        {% set usage_percent = (tenant.current_usage / tenant.budget_limit * 100) %}
+                        {% if usage_percent < 70 %}
+                            <div class="progress-bar bg-success" style="width: {{ usage_percent }}%"></div>
+                        {% elif usage_percent < 90 %}
+                            <div class="progress-bar bg-warning" style="width: {{ usage_percent }}%"></div>
+                        {% else %}
+                            <div class="progress-bar bg-danger" style="width: {{ usage_percent }}%"></div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Compliance Requirements</small>
+                    <div>
+                        {% for compliance in tenant.compliance %}
+                            <span class="badge bg-secondary me-1">{{ compliance }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Priority Level</small>
+                    <div>
+                        {% if tenant.priority == 'high' %}
+                            <span class="badge bg-danger">{{ tenant.priority|title }}</span>
+                        {% elif tenant.priority == 'medium' %}
+                            <span class="badge bg-warning">{{ tenant.priority|title }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ tenant.priority|title }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-block">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="viewTenantDetails('{{ tenant_id }}')">
+                        <i class="bi bi-eye me-1"></i>View Details
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Tenant Details Table -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-table me-2"></i>Detailed Tenant Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="tenantsTable">
+                <thead>
+                    <tr>
+                        <th>Tenant</th>
+                        <th>Type</th>
+                        <th>Compliance</th>
+                        <th>Placements</th>
+                        <th>Success Rate</th>
+                        <th>Budget Usage</th>
+                        <th>Priority</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tenant_id, tenant in tenants.items() %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="fw-bold">{{ tenant.name }}</div>
+                                    <small class="text-muted">{{ tenant_id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if tenant.type == 'standard' %}
+                                <span class="badge bg-primary">{{ tenant.type|title }}</span>
+                            {% elif tenant.type == 'enhanced' %}
+                                <span class="badge bg-warning">{{ tenant.type|title }}</span>
+                            {% elif tenant.type == 'dedicated' %}
+                                <span class="badge bg-danger">{{ tenant.type|title }}</span>
+                            {% elif tenant.type == 'government' %}
+                                <span class="badge bg-success">{{ tenant.type|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for compliance in tenant.compliance %}
+                                <span class="badge bg-secondary me-1">{{ compliance }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <span class="fw-bold">{{ tenant_stats[tenant_id].total_placements }}</span>
+                        </td>
+                        <td>
+                            <span class="text-success fw-bold">{{ "%.1f"|format(tenant_stats[tenant_id].success_rate) }}%</span>
+                        </td>
+                        <td>
+                            {% set usage_percent = (tenant.current_usage / tenant.budget_limit * 100) %}
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 60px; height: 8px;">
+                                    {% if usage_percent < 70 %}
+                                        <div class="progress-bar bg-success" style="width: {{ usage_percent }}%"></div>
+                                    {% elif usage_percent < 90 %}
+                                        <div class="progress-bar bg-warning" style="width: {{ usage_percent }}%"></div>
+                                    {% else %}
+                                        <div class="progress-bar bg-danger" style="width: {{ usage_percent }}%"></div>
+                                    {% endif %}
+                                </div>
+                                <small>{{ "%.0f"|format(usage_percent) }}%</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if tenant.priority == 'high' %}
+                                <span class="badge bg-danger">{{ tenant.priority|title }}</span>
+                            {% elif tenant.priority == 'medium' %}
+                                <span class="badge bg-warning">{{ tenant.priority|title }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ tenant.priority|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                        onclick="viewTenantDetails('{{ tenant_id }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-graph-up"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Tenant Details Modal -->
+<div class="modal fade" id="tenantDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-badge me-2"></i>Tenant Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="tenantDetailsBody">
+                <!-- Content will be populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Edit Tenant</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Sample tenant data for modal details
+const tenantData = {
+    {% for tenant_id, tenant in tenants.items() %}
+    '{{ tenant_id }}': {
+        id: '{{ tenant_id }}',
+        name: '{{ tenant.name }}',
+        type: '{{ tenant.type }}',
+        compliance: {{ tenant.compliance|tojson }},
+        budget_limit: {{ tenant.budget_limit }},
+        current_usage: {{ tenant.current_usage }},
+        priority: '{{ tenant.priority }}',
+        stats: {
+            total_placements: {{ tenant_stats[tenant_id].total_placements }},
+            success_rate: {{ tenant_stats[tenant_id].success_rate }},
+            avg_cost_efficiency: {{ tenant_stats[tenant_id].avg_cost_efficiency }},
+            compliance_score: {{ tenant_stats[tenant_id].compliance_score }}
+        }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+
+function viewTenantDetails(tenantId) {
+    const tenant = tenantData[tenantId];
+    if (!tenant) return;
+    
+    const usagePercent = (tenant.current_usage / tenant.budget_limit * 100);
+    let budgetStatus = 'success';
+    if (usagePercent >= 90) budgetStatus = 'danger';
+    else if (usagePercent >= 70) budgetStatus = 'warning';
+    
+    const modalBody = document.getElementById('tenantDetailsBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Basic Information</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Tenant ID:</strong></td><td><code>${tenant.id}</code></td></tr>
+                    <tr><td><strong>Name:</strong></td><td>${tenant.name}</td></tr>
+                    <tr><td><strong>Type:</strong></td><td><span class="badge bg-info">${tenant.type}</span></td></tr>
+                    <tr><td><strong>Priority:</strong></td><td><span class="badge bg-${tenant.priority === 'high' ? 'danger' : tenant.priority === 'medium' ? 'warning' : 'secondary'}">${tenant.priority}</span></td></tr>
+                </table>
+                
+                <h6 class="mt-3">Budget & Usage</h6>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Current Usage:</span>
+                        <span><strong>$${tenant.current_usage.toLocaleString()}</strong></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Budget Limit:</span>
+                        <span><strong>$${tenant.budget_limit.toLocaleString()}</strong></span>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar bg-${budgetStatus}" style="width: ${usagePercent}%">
+                            ${usagePercent.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h6>Performance Metrics</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Total Placements:</strong></td><td>${tenant.stats.total_placements}</td></tr>
+                    <tr><td><strong>Success Rate:</strong></td><td><span class="text-success">${tenant.stats.success_rate.toFixed(1)}%</span></td></tr>
+                    <tr><td><strong>Cost Efficiency:</strong></td><td><span class="text-info">${tenant.stats.avg_cost_efficiency.toFixed(1)}%</span></td></tr>
+                    <tr><td><strong>Compliance Score:</strong></td><td><span class="text-warning">${tenant.stats.compliance_score.toFixed(1)}%</span></td></tr>
+                </table>
+                
+                <h6 class="mt-3">Compliance Requirements</h6>
+                <div>
+                    ${tenant.compliance.map(c => `<span class="badge bg-secondary me-1">${c}</span>`).join('')}
+                </div>
+                
+                <h6 class="mt-3">Quick Actions</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>New Placement Request
+                    </button>
+                    <button class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-graph-up me-1"></i>View Analytics
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <h6>Recent Activity</h6>
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Recent placement activity and resource usage trends would be displayed here in a production environment.
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('tenantDetailsModal'));
+    modal.show();
+}
+
+// Initialize DataTable for tenant table (optional enhancement)
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any additional initialization here
+    console.log('Tenant Management loaded with', Object.keys(tenantData).length, 'tenants');
+});
+</script>
+{% endblock %}

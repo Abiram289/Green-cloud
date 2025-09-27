@@ -1,0 +1,222 @@
+[
+  {
+    "host_id": 0,
+    "cpu_cores": 15,
+    "ram_gb": 62,
+    "base_power_watts": 194.9816047538945,
+    "cost_per_hour": 0.779926419015578,
+    "current_cpu_usage": 0,
+    "current_ram_usage": 49.38725769586088,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.04802857225639665
+  },
+  {
+    "host_id": 1,
+    "cpu_cores": 16,
+    "ram_gb": 66,
+    "base_power_watts": 209.27975767245618,
+    "cost_per_hour": 0.8371190306898249,
+    "current_cpu_usage": 0.0014973404151015501,
+    "current_ram_usage": 58.120988029521875,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.03394633936788147
+  },
+  {
+    "host_id": 2,
+    "cpu_cores": 59,
+    "ram_gb": 238,
+    "base_power_watts": 465.60186404424365,
+    "cost_per_hour": 2.048648201794672,
+    "current_cpu_usage": 42.777099372421375,
+    "current_ram_usage": 8.518476525167058,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.016239780813448106
+  },
+  {
+    "host_id": 3,
+    "cpu_cores": 29,
+    "ram_gb": 116,
+    "base_power_watts": 319.06585285177397,
+    "cost_per_hour": 1.3674250836504598,
+    "current_cpu_usage": 15.980316944043203,
+    "current_ram_usage": 62.10866974162543,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.04464704583099741
+  },
+  {
+    "host_id": 4,
+    "cpu_cores": 32,
+    "ram_gb": 130,
+    "base_power_watts": 357.07805082202464,
+    "cost_per_hour": 1.5303345035229627,
+    "current_cpu_usage": 17.487877264377794,
+    "current_ram_usage": 23.431179243382573,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.03832290311184182
+  },
+  {
+    "host_id": 5,
+    "cpu_cores": 28,
+    "ram_gb": 115,
+    "base_power_watts": 316.44091460070615,
+    "cost_per_hour": 1.3561753482887406,
+    "current_cpu_usage": 0,
+    "current_ram_usage": 47.703371242628926,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.048796394086479775
+  },
+  {
+    "host_id": 6,
+    "cpu_cores": 17,
+    "ram_gb": 68,
+    "base_power_watts": 213.29770563201689,
+    "cost_per_hour": 0.8531908225280675,
+    "current_cpu_usage": 1.3071880399774813,
+    "current_ram_usage": 61.2,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.018493564427131046
+  },
+  {
+    "host_id": 7,
+    "cpu_cores": 14,
+    "ram_gb": 59,
+    "base_power_watts": 187.27299868828402,
+    "cost_per_hour": 0.7490919947531361,
+    "current_cpu_usage": 10.057886837570308,
+    "current_ram_usage": 0,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.017336180394137354
+  },
+  {
+    "host_id": 8,
+    "cpu_cores": 7,
+    "ram_gb": 30,
+    "base_power_watts": 115.30181383102891,
+    "cost_per_hour": 0.4804242242959538,
+    "current_cpu_usage": 3.6808228784773123,
+    "current_ram_usage": 0.3804740554048856,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.030990257265289513
+  },
+  {
+    "host_id": 9,
+    "cpu_cores": 15,
+    "ram_gb": 63,
+    "base_power_watts": 197.27780074568463,
+    "cost_per_hour": 0.7891112029827386,
+    "current_cpu_usage": 0.7515361500221629,
+    "current_ram_usage": 21.305283481077414,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.021649165607921676
+  },
+  {
+    "host_id": 10,
+    "cpu_cores": 16,
+    "ram_gb": 65,
+    "base_power_watts": 204.47411578889518,
+    "cost_per_hour": 0.8178964631555807,
+    "current_cpu_usage": 5.623186723964584,
+    "current_ram_usage": 29.349409624484736,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.015579754426081675
+  },
+  {
+    "host_id": 11,
+    "cpu_cores": 15,
+    "ram_gb": 61,
+    "base_power_watts": 191.68578594140874,
+    "cost_per_hour": 0.7667431437656349,
+    "current_cpu_usage": 1.7406265829773382,
+    "current_ram_usage": 14.149711793337922,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.02465447373174767
+  },
+  {
+    "host_id": 12,
+    "cpu_cores": 31,
+    "ram_gb": 126,
+    "base_power_watts": 346.92489889519254,
+    "cost_per_hour": 1.486820995265111,
+    "current_cpu_usage": 8.36255298957775,
+    "current_ram_usage": 36.56685455584922,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.041407038455720545
+  },
+  {
+    "host_id": 13,
+    "cpu_cores": 30,
+    "ram_gb": 120,
+    "base_power_watts": 328.9771647510852,
+    "cost_per_hour": 1.409902134647508,
+    "current_cpu_usage": 13.868322515706272,
+    "current_ram_usage": 35.280728730590006,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.030569377536544463
+  },
+  {
+    "host_id": 14,
+    "cpu_cores": 16,
+    "ram_gb": 65,
+    "base_power_watts": 203.6965827544817,
+    "cost_per_hour": 0.8147863310179269,
+    "current_cpu_usage": 3.627482724955537,
+    "current_ram_usage": 47.072548593680324,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.01185801650879991
+  },
+  {
+    "host_id": 15,
+    "cpu_cores": 32,
+    "ram_gb": 130,
+    "base_power_watts": 357.5281396331007,
+    "cost_per_hour": 1.5322634555704315,
+    "current_cpu_usage": 5.304789117249372,
+    "current_ram_usage": 10.617996796697476,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.016820964947491662
+  },
+  {
+    "host_id": 16,
+    "cpu_cores": 7,
+    "ram_gb": 29,
+    "base_power_watts": 109.56123823164671,
+    "cost_per_hour": 0.456505159298528,
+    "current_cpu_usage": 0,
+    "current_ram_usage": 16.758836807744537,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.047955421490133335
+  },
+  {
+    "host_id": 17,
+    "cpu_cores": 34,
+    "ram_gb": 139,
+    "base_power_watts": 382.5942423152191,
+    "cost_per_hour": 1.6396896099223677,
+    "current_cpu_usage": 3.491789128644151,
+    "current_ram_usage": 2.5690957673409907,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.042335893924658446
+  },
+  {
+    "host_id": 18,
+    "cpu_cores": 7,
+    "ram_gb": 30,
+    "base_power_watts": 115.3107304601609,
+    "cost_per_hour": 0.4804613769173371,
+    "current_cpu_usage": 0.296379065443926,
+    "current_ram_usage": 2.2627914701657255,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.013906884560255354
+  },
+  {
+    "host_id": 19,
+    "cpu_cores": 66,
+    "ram_gb": 265,
+    "base_power_watts": 518.4233026512157,
+    "cost_per_hour": 2.2810625316653494,
+    "current_cpu_usage": 24.739147425323946,
+    "current_ram_usage": 104.69151543560731,
+    "current_power_watts": 0.0,
+    "sla_risk_factor": 0.02760609974958405
+  }
+]

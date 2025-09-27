@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Audit & Compliance - Enterprise VM Placement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-shield-check me-2"></i>Audit & Compliance Dashboard
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-download me-1"></i>Export Report
+        </button>
+        <button type="button" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Compliance Metrics Row -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card success">
+            <h2>{{ total_placements }}</h2>
+            <p><i class="bi bi-cloud-upload me-1"></i>Total Placements Audited</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card info">
+            <h2>{{ compliance_violations }}</h2>
+            <p><i class="bi bi-exclamation-triangle me-1"></i>Compliance Violations</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card warning">
+            <h2>{{ security_incidents }}</h2>
+            <p><i class="bi bi-shield-x me-1"></i>Security Incidents</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card danger">
+            <h2>{{ "%.1f"|format(avg_response_time) }}ms</h2>
+            <p><i class="bi bi-stopwatch me-1"></i>Avg Response Time</p>
+        </div>
+    </div>
+</div>
+
+<!-- Compliance Status Cards -->
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-check2-circle me-2"></i>Compliance Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center p-3 border rounded mb-3">
+                            <h4 class="text-success mb-1">100%</h4>
+                            <small class="text-muted">HIPAA Compliance</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 border rounded mb-3">
+                            <h4 class="text-success mb-1">100%</h4>
+                            <small class="text-muted">PCI-DSS Compliance</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 border rounded mb-3">
+                            <h4 class="text-success mb-1">100%</h4>
+                            <small class="text-muted">FedRAMP Compliance</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 border rounded mb-3">
+                            <h4 class="text-success mb-1">100%</h4>
+                            <small class="text-muted">SOC2 Compliance</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-graph-up me-2"></i>Security Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Data Encryption</span>
+                        <span class="text-success fw-bold">100%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Access Control</span>
+                        <span class="text-success fw-bold">100%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Audit Logging</span>
+                        <span class="text-success fw-bold">100%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Network Isolation</span>
+                        <span class="text-success fw-bold">100%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Visualization -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-bar-chart me-2"></i>Audit & Compliance Analytics</h5>
+            </div>
+            <div class="card-body">
+                {% if audit_plot %}
+                    <img src="data:image/png;base64,{{ audit_plot }}" class="img-fluid" alt="Audit Analytics Chart">
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Audit analytics chart will be displayed here</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Audit Activities -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul me-2"></i>Recent Audit Activities</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Activity</th>
+                                <th>Tenant</th>
+                                <th>Compliance Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in recent_activities %}
+                            <tr>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ activity.timestamp.split('T')[0] }}<br>
+                                        {{ activity.timestamp.split('T')[1].split('.')[0] if '.' in activity.timestamp else activity.timestamp.split('T')[1] }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-cloud-upload me-2 text-primary"></i>
+                                        <div>
+                                            <div class="fw-bold">VM Placement</div>
+                                            <small class="text-muted">{{ activity.vm_request.workload_type|title }} workload</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ activity.vm_request.tenant_id }}</span>
+                                </td>
+                                <td>
+                                    {% if activity.result.success %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Compliant
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if activity.result.success %}
+                                        <small class="text-success">
+                                            Placed on {{ activity.result.host_id }}<br>
+                                            All compliance checks passed
+                                        </small>
+                                    {% else %}
+                                        <small class="text-danger">
+                                            Placement failed<br>
+                                            {{ activity.result.message }}
+                                        </small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No recent audit activities</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Compliance Certificates -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6><i class="bi bi-award me-2"></i>Compliance Certificates</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>SOC 2 Type II</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+                <small class="text-muted">Valid until: Dec 31, 2024</small>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>ISO 27001</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+                <small class="text-muted">Valid until: Mar 15, 2025</small>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>FedRAMP Moderate</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+                <small class="text-muted">Valid until: Jun 30, 2024</small>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>HIPAA BAA</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+                <small class="text-muted">Continuous compliance</small>
+            </div>
+        </div>
+        
+        <!-- Risk Assessment -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6><i class="bi bi-shield-exclamation me-2"></i>Risk Assessment</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="display-6 text-success">LOW</div>
+                    <small class="text-muted">Current Risk Level</small>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Security Risk</small>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 15%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Compliance Risk</small>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 5%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Operational Risk</small>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 10%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="bi bi-gear me-2"></i>Audit Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-file-earmark-text me-1"></i>Generate Audit Report
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-search me-1"></i>Search Audit Logs
+                    </button>
+                    <button class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-shield-check me-1"></i>Run Compliance Check
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Review Violations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh compliance metrics every 60 seconds
+    setInterval(function() {
+        updateComplianceMetrics();
+    }, 60000);
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    console.log('Audit & Compliance Dashboard loaded');
+});
+
+function updateComplianceMetrics() {
+    fetch('/api/system_status')
+        .then(response => response.json())
+        .then(data => {
+            // Update real-time compliance metrics
+            console.log('Compliance metrics updated:', data.timestamp);
+        })
+        .catch(error => console.log('Error updating compliance metrics:', error));
+}
+
+function generateAuditReport() {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Generating...';
+    button.disabled = true;
+    
+    // Simulate report generation
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="bi bi-check-circle me-2"></i>Audit report generated successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.querySelector('.container-fluid .row').insertBefore(alert, document.querySelector('.container-fluid .row').firstChild);
+        
+        // Auto-dismiss alert after 5 seconds
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+    }, 3000);
+}
+
+function searchAuditLogs() {
+    // Placeholder for audit log search functionality
+    alert('Audit log search functionality would be implemented here in a production environment.');
+}
+
+function runComplianceCheck() {
+    // Placeholder for compliance check functionality
+    alert('Compliance check functionality would be implemented here in a production environment.');
+}
+</script>
+{% endblock %}
