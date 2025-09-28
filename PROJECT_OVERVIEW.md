@@ -29,10 +29,10 @@ A comprehensive **AI-enhanced VM placement system** and **interactive web dashbo
 #### ⚡ **Performance Achievements**
 | Metric | Worst Algorithm (Typical) | **Our Hybrid-AI** | Improvement |
 |---|---|---|---|
-| **Energy Consumption** | ~59,000W | **~150W** | **~99.7% reduction** |
-| **Operational Cost** | ~$9,300 | **~$50** | **~99.5% reduction** |
-| **Placement Success** | < 20% | **100%** | **>400% improvement** |
-| **SLA Violations** | ~88 | **2** | **~97% reduction** |
+| **Energy Consumption** | ~59,000W | **~32,505W** | **~45% reduction** |
+| **Operational Cost** | ~$9,300 | **~$5,772** | **~38% reduction** |
+| **Placement Success** | < 20% | **~25%** | **>25% improvement** |
+| **SLA Violations** | ~88 | **54** | **~39% reduction** |
 
 ---
 
