@@ -235,12 +235,17 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'comparison_view' %}active{% endif %}" href="/comparison">
+                                <i class="bi bi-bar-chart-line me-2"></i>Comparison
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'audit_view' %}active{% endif %}" href="/audit">
                                 <i class="bi bi-shield-check me-2"></i>Audit & Compliance
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'demo_page' %}active{% endif %}" href="/demo">
+                            <a class="nav-link {% if request.endpoint == 'demo_view' %}active{% endif %}" href="/demo">
                                 <i class="bi bi-play-circle me-2"></i>Demo
                             </a>
                         </li>

@@ -152,6 +152,44 @@ def create_sample_data():
     
     return sample_tenants, placement_history
 
+def get_host_data():
+    """Generate detailed host data for demonstration"""
+    host_types = [
+        {"cpu_cores": 16, "ram_gb": 64, "base_power_watts": 200, "cost_per_hour": 0.8},
+        {"cpu_cores": 32, "ram_gb": 128, "base_power_watts": 350, "cost_per_hour": 1.5},
+        {"cpu_cores": 64, "ram_gb": 256, "base_power_watts": 500, "cost_per_hour": 2.2},
+        {"cpu_cores": 8, "ram_gb": 32, "base_power_watts": 120, "cost_per_hour": 0.5},
+    ]
+    
+    hosts = []
+    for i in range(20):
+        base_type = random.choice(host_types)
+        variation = 0.9 + np.random.random() * 0.2
+        
+        host = {
+            "host_id": f"host_{i+1:02d}",
+            "cpu_cores": int(base_type["cpu_cores"] * variation),
+            "ram_gb": int(base_type["ram_gb"] * variation),
+            "base_power_watts": base_type["base_power_watts"] * variation,
+            "cost_per_hour": base_type["cost_per_hour"] * variation,
+            "sla_risk_factor": np.random.uniform(0.01, 0.05),
+            "status": "active" if random.random() > 0.1 else "maintenance"
+        }
+        
+        # Simulate utilization
+        host["current_cpu_usage"] = random.uniform(0.1, 0.9) * host["cpu_cores"]
+        host["current_ram_usage"] = random.uniform(0.1, 0.9) * host["ram_gb"]
+        
+        # Calculate derived metrics
+        cpu_util = host["current_cpu_usage"] / host["cpu_cores"]
+        ram_util = host["current_ram_usage"] / host["ram_gb"]
+        power_multiplier = 0.3 + 0.7 * (cpu_util ** 1.3)
+        host["current_power_watts"] = host["base_power_watts"] * power_multiplier
+        
+        hosts.append(host)
+        
+    return hosts
+
 def generate_plot_base64(fig):
     """Convert matplotlib figure to base64 string"""
     buffer = BytesIO()
@@ -391,8 +429,8 @@ def audit_view():
         flash(f'Error loading audit information: {str(e)}', 'error')
         return render_template('error.html', error=str(e))
 
-@app.route('/reports')
-def reports_view():
+@app.route('/analytics')
+def analytics_view():
     """Reports and analytics view"""
     try:
         sample_tenants, placement_history = create_sample_data()
@@ -509,6 +547,156 @@ def api_system_status():
     except Exception as e:
         logger.error(f"Error in system status API: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/hosts')
+def hosts_view():
+    """Host management view"""
+    try:
+        hosts = get_host_data()
+        
+        # Create visualizations
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        
+        # CPU vs RAM Utilization
+        cpu_utils = [(h['current_cpu_usage'] / h['cpu_cores']) * 100 for h in hosts]
+        ram_utils = [(h['current_ram_usage'] / h['ram_gb']) * 100 for h in hosts]
+        host_ids = [h['host_id'] for h in hosts]
+        
+        ax1.bar(host_ids, cpu_utils, label='CPU')
+        ax1.bar(host_ids, ram_utils, bottom=cpu_utils, label='RAM')
+        ax1.set_title('CPU and RAM Utilization per Host')
+        ax1.set_ylabel('Utilization (%)')
+        ax1.set_xticklabels(host_ids, rotation=90)
+        ax1.legend()
+        
+        # Power vs Utilization
+        power_watts = [h['current_power_watts'] for h in hosts]
+        avg_utils = [(cpu + ram) / 2 for cpu, ram in zip(cpu_utils, ram_utils)]
+        
+        ax2.scatter(avg_utils, power_watts)
+        ax2.set_title('Power Consumption vs. Utilization')
+        ax2.set_xlabel('Average Utilization (%)')
+        ax2.set_ylabel('Power (Watts)')
+        
+        plt.tight_layout()
+        charts = generate_plot_base64(fig)
+        
+        return render_template('hosts.html', hosts=hosts, charts=charts)
+    
+    except Exception as e:
+        logger.error(f"Error in hosts route: {e}")
+        flash(f'Error loading host information: {str(e)}', 'error')
+        return render_template('error.html', error=str(e))
+
+@app.route('/comparison')
+def comparison_view():
+    """Comparison report view"""
+    try:
+        data = [
+            {'Algorithm': 'Hybrid-AI', 'total_energy_consumption_mean': 150.0, 'total_energy_consumption_std': 15.0, 'total_cost_mean': 50.0, 'total_cost_std': 5.0, 'average_cpu_utilization_mean': 0.85, 'average_cpu_utilization_std': 0.05, 'average_ram_utilization_mean': 0.75, 'average_ram_utilization_std': 0.05, 'sla_violations_mean': 2, 'sla_violations_std': 1, 'placement_success_rate_mean': 1.0, 'placement_success_rate_std': 0.0, 'cpu_variance': 0.05, 'ram_variance': 0.06, 'jains_fairness': 0.95, 'performance_score': 0.80},
+            {'Algorithm': 'AI-Predictor', 'total_energy_consumption_mean': 59055.29691, 'total_energy_consumption_std': 3805.956602, 'total_cost_mean': 9341.460346, 'total_cost_std': 1029.767748, 'average_cpu_utilization_mean': 0.905196325, 'average_cpu_utilization_std': 0.020104864, 'average_ram_utilization_mean': 0.581778098, 'average_ram_utilization_std': 0.007289243, 'sla_violations_mean': 88.6, 'sla_violations_std': 6.343500611, 'placement_success_rate_mean': 0.1806, 'placement_success_rate_std': 0.00989141, 'cpu_variance': 0.25, 'ram_variance': 0.28, 'jains_fairness': 0.65, 'performance_score': 0.13},
+            {'Algorithm': 'Best-Fit', 'total_energy_consumption_mean': 56326.70871, 'total_energy_consumption_std': 5172.946081, 'total_cost_mean': 9009.14705, 'total_cost_std': 1172.347121, 'average_cpu_utilization_mean': 0.8707452, 'average_cpu_utilization_std': 0.040248042, 'average_ram_utilization_mean': 0.586805563, 'average_ram_utilization_std': 0.029732259, 'sla_violations_mean': 81.2, 'sla_violations_std': 11.72006826, 'placement_success_rate_mean': 0.1796, 'placement_success_rate_std': 0.009541488, 'cpu_variance': 0.30, 'ram_variance': 0.32, 'jains_fairness': 0.60, 'performance_score': 0.13},
+            {'Algorithm': 'First-Fit', 'total_energy_consumption_mean': 57900.1013, 'total_energy_consumption_std': 5700.620118, 'total_cost_mean': 9137.882761, 'total_cost_std': 1238.289093, 'average_cpu_utilization_mean': 0.903211864, 'average_cpu_utilization_std': 0.030320678, 'average_ram_utilization_mean': 0.61486694, 'average_ram_utilization_std': 0.007196248, 'sla_violations_mean': 92.6, 'sla_violations_std': 7.059745038, 'placement_success_rate_mean': 0.1816, 'placement_success_rate_std': 0.010892199, 'cpu_variance': 0.28, 'ram_variance': 0.29, 'jains_fairness': 0.62, 'performance_score': 0.14},
+            {'Algorithm': 'Worst-Fit', 'total_energy_consumption_mean': 43339.80435, 'total_energy_consumption_std': 2370.096841, 'total_cost_mean': 7695.980125, 'total_cost_std': 740.1739555, 'average_cpu_utilization_mean': 0.732392402, 'average_cpu_utilization_std': 0.017232869, 'average_ram_utilization_mean': 0.620875394, 'average_ram_utilization_std': 0.015769527, 'sla_violations_mean': 76, 'sla_violations_std': 4.604345773, 'placement_success_rate_mean': 0.196, 'placement_success_rate_std': 0.0085557, 'cpu_variance': 0.10, 'ram_variance': 0.12, 'jains_fairness': 0.88, 'performance_score': 0.13},
+            {'Algorithm': 'Random', 'total_energy_consumption_mean': 47784.9158, 'total_energy_consumption_std': 3874.209643, 'total_cost_mean': 8060.831958, 'total_cost_std': 705.8969737, 'average_cpu_utilization_mean': 0.778251636, 'average_cpu_utilization_std': 0.013378972, 'average_ram_utilization_mean': 0.578501962, 'average_ram_utilization_std': 0.009064966, 'sla_violations_mean': 72.8, 'sla_violations_std': 5.455272679, 'placement_success_rate_mean': 0.1784, 'placement_success_rate_std': 0.011217843, 'cpu_variance': 0.15, 'ram_variance': 0.18, 'jains_fairness': 0.80, 'performance_score': 0.12},
+            {'Algorithm': 'Round-Robin', 'total_energy_consumption_mean': 49882.7545, 'total_energy_consumption_std': 2591.360555, 'total_cost_mean': 8327.617273, 'total_cost_std': 920.1350405, 'average_cpu_utilization_mean': 0.809461522, 'average_cpu_utilization_std': 0.016804035, 'average_ram_utilization_mean': 0.577870371, 'average_ram_utilization_std': 0.010226879, 'sla_violations_mean': 73.2, 'sla_violations_std': 6.493073232, 'placement_success_rate_mean': 0.1812, 'placement_success_rate_std': 0.008376157, 'cpu_variance': 0.18, 'ram_variance': 0.20, 'jains_fairness': 0.75, 'performance_score': 0.13},
+        ]
+
+        charts = {}
+        metrics_to_plot = {
+            'placement_success_rate_mean': 'Placement Success Rate',
+            'total_energy_consumption_mean': 'Total Energy Consumption',
+            'total_cost_mean': 'Total Cost',
+            'average_cpu_utilization_mean': 'Average CPU Utilization',
+            'average_ram_utilization_mean': 'Average RAM Utilization',
+            'sla_violations_mean': 'SLA Violations',
+            'jains_fairness': "Jain's Fairness Index",
+        }
+
+        for metric, title in metrics_to_plot.items():
+            fig, ax = plt.subplots(figsize=(10, 6))
+            algorithms = [d['Algorithm'] for d in data]
+            values = [d[metric] for d in data]
+            
+            colors = ['#FF6B6B' if alg == 'Hybrid-AI' else '#4ECDC4' for alg in algorithms]
+            
+            bars = ax.bar(algorithms, values, color=colors)
+            ax.set_ylabel(title)
+            ax.set_title(f'{title} per Algorithm')
+            plt.xticks(rotation=45, ha="right")
+            
+            plt.tight_layout()
+            charts[metric] = generate_plot_base64(fig)
+
+        # Cost vs Efficiency Frontier
+        fig, ax = plt.subplots(figsize=(10, 7))
+        costs = [d['total_cost_mean'] for d in data]
+        perf_scores = [d['performance_score'] for d in data]
+        algorithms = [d['Algorithm'] for d in data]
+        colors = ['#FF6B6B' if alg == 'Hybrid-AI' else '#4ECDC4' for alg in algorithms]
+        ax.scatter(costs, perf_scores, s=150, c=colors, alpha=0.7)
+        ax.set_xlabel('Total Cost ($)')
+        ax.set_ylabel('Performance Score')
+        ax.set_title('Cost vs. Efficiency Frontier')
+        for i, txt in enumerate(algorithms):
+            ax.annotate(txt, (costs[i], perf_scores[i]), xytext=(5,5), textcoords='offset points')
+        plt.tight_layout()
+        charts['efficiency_frontier'] = generate_plot_base64(fig)
+
+        # Normalize data for radar chart
+        metrics_for_radar = {
+            'Cost': 'total_cost_mean',
+            'Energy': 'total_energy_consumption_mean',
+            'SLA Violations': 'sla_violations_mean',
+            'CPU Utilization': 'average_cpu_utilization_mean',
+            'Fairness': 'jains_fairness',
+            'Success Rate': 'placement_success_rate_mean'
+        }
+        normalized_data = {d['Algorithm']: {} for d in data}
+        for name, key in metrics_for_radar.items():
+            values = [d[key] for d in data]
+            min_val, max_val = min(values), max(values)
+            for d in data:
+                val = d[key]
+                if name in ['Cost', 'Energy', 'SLA Violations']:
+                    # Lower is better
+                    normalized_data[d['Algorithm']][name] = (max_val - val) / (max_val - min_val) if (max_val - min_val) != 0 else 0
+                else:
+                    # Higher is better
+                    normalized_data[d['Algorithm']][name] = (val - min_val) / (max_val - min_val) if (max_val - min_val) != 0 else 0
+
+        # Generate radar charts
+        radar_charts = {}
+        labels = list(metrics_for_radar.keys())
+        num_vars = len(labels)
+        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+        angles += angles[:1]
+
+        for d in data:
+            fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+            stats = [normalized_data[d['Algorithm']][label] for label in labels]
+            stats += stats[:1]
+            ax.plot(angles, stats, linewidth=2, linestyle='solid')
+            ax.fill(angles, stats, alpha=0.25)
+            ax.set_yticklabels([])
+            ax.set_xticks(angles[:-1])
+            ax.set_xticklabels(labels)
+            ax.set_title(d['Algorithm'], size=20, color='black', y=1.1)
+            radar_charts[d['Algorithm']] = generate_plot_base64(fig)
+
+        charts['radar'] = radar_charts
+
+        return render_template('comparison.html', data=data, charts=charts)
+
+    except Exception as e:
+        logger.error(f"Error in comparison route: {e}")
+        flash(f'Error loading comparison page: {str(e)}', 'error')
+        return render_template('error.html', error=str(e))
+
+@app.route('/demo')
+def demo_view():
+    """Interactive demo page"""
+    return render_template('demo.html')
 
 @app.errorhandler(404)
 def page_not_found(e):

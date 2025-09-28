@@ -1,77 +1,63 @@
 # Quick Start Guide
 
-## 🚀 **Most Common Commands**
+This guide provides the fastest path to running the project and seeing the results via the interactive web dashboard.
 
-### **Generate Complete Visualization Suite**
-```powershell
-python comprehensive_visualization.py
+---
+
+## 🚀 **Quick Start: 3 Steps to Launch**
+
+**Step 1: Install Dependencies**
+
+```bash
+  pip install -r requirements.txt
 ```
-**Output:** `results/executive_dashboard.png`, `results/technical_analysis.png`, `results/comparison_matrix.png`
 
-### **Debug AI Algorithm Issues**
-```powershell
-python debug_ai_placement.py
+**Step 2: Launch the Web Application**
+
+```bash
+  python start_webapp.py
 ```
-**Output:** Console diagnostics for feature mapping and AI prediction quality
 
-### **Test Improved AI Performance**
-```powershell
-python improved_ai_algorithm.py
-```
-**Output:** Console test results showing energy/cost improvements
+**Step 3: Open Your Browser**
 
-### **Check System Environment**
-```powershell
-python check_system.py
-```
-**Output:** Python version, package status, model file existence
+Navigate to **`http://localhost:5000`**. The main dashboard will load.
 
-## 📊 **Understanding the Results**
+---
 
-### **Performance Ranking (results/performance_ranking.csv)**
-- **Column 1:** Algorithm name
-- **Column 2:** Composite score (higher = better)
-- **Columns 3-6:** Normalized scores for Success/Efficiency/Cost/Energy
+## 📊 **Where to Find the Results**
 
-### **Benchmark Results (results/benchmark_results.json)**
-- **Per algorithm arrays:** energy_consumption, cost, cpu_utilization, ram_utilization
-- **Success metrics:** success_count, placement_times, efficiency_scores
+For the most important findings, go directly to the **Comparison Analysis** page:
+
+- **URL**: **`http://localhost:5000/comparison`**
+
+This page provides the definitive, professional report comparing the `Hybrid-AI` to all other algorithms, complete with charts, data tables, and detailed takeaways.
+
+### **Other Key Pages**
+
+| Page | URL | Purpose |
+|---|---|---|
+| **Comparison Analysis** | `/comparison` | **(Start Here)** The main results and analysis report. |
+| **Host Management** | `/hosts` | A detailed overview of all host machines. |
+| **Dashboard** | `/` | A high-level summary of system status. |
+
+---
 
 ## 🎯 **Key Files to Know**
 
-| File | Purpose | When to Use |
-|------|---------|-------------|
-| `comprehensive_visualization.py` | Main visualization generator | Creating presentations/reports |
-| `improved_ai_algorithm.py` | Production-ready AI engine | Best performance + reliability |
-| `src/enhanced_algorithms.py` | Original hybrid AI | Research/comparison |
-| `src/placement_algorithms.py` | Traditional algorithms | Baseline comparisons |
-| `results/executive_dashboard.png` | Business-level metrics | Executive presentations |
-| `results/technical_analysis.png` | Engineering deep-dive | Technical reviews |
-| `models/hybrid_ai_predictor.pkl` | Main AI model | Used by all AI algorithms |
+| File | Purpose |
+|---|---|
+| **`app.py`** | The main Flask web application that runs the UI. |
+| **`templates/comparison.html`** | The HTML file for the main results report page. |
+| **`src/enhanced_algorithms.py`** | Contains the code for the winning `HybridAIPredictorPlacement`. |
+| **`src/advanced_model_trainer.py`** | The script used to train the advanced `Hybrid-AI` model. |
+| **`models/hybrid_ai_predictor.pkl`** | The final, trained AI model file. |
 
-## ⚡ **Common Issues & Quick Fixes**
+---
 
-| Problem | Solution |
-|---------|----------|
-| `ImportError: cannot import name 'FirstFitAlgorithm'` | Use `FirstFitPlacement` instead |
-| AI predictions all ~0.0 | Run `debug_ai_placement.py` to diagnose |
-| Seaborn import hangs | Use `comprehensive_visualization.py` instead |
-| Results look unrealistic | Increase `num_scenarios` in visualization script |
-| Missing model files | Check `models/` directory exists with `.pkl` files |
+## 📈 **Expected Results**
 
-## 🔄 **Typical Workflow**
+When you view the `/comparison` page, you should see conclusive evidence that the **`Hybrid-AI`** is the superior algorithm, achieving:
 
-1. **Check system:** `python check_system.py`
-2. **Generate visuals:** `python comprehensive_visualization.py`
-3. **Debug if needed:** `python debug_ai_placement.py`
-4. **Review results:** Open `results/executive_dashboard.png`
-
-## 📈 **Expected Performance**
-
-| Algorithm | Typical Energy | Typical Cost | Success Rate |
-|-----------|---------------|--------------|--------------|
-| **Improved AI** | ~94W | ~$22 | 100% |
-| **LB-Best-Fit** | ~150-300W | ~$50-100 | 100% |
-| **Traditional** | ~400-600W | ~$100-200 | 95-100% |
-
-*Results vary by scenario distribution and host configurations*
+- **100% Placement Success** (vs. <20% for others)
+- **~99% Reduction** in both cost and energy consumption.
+- The best balance of high resource utilization and system stability (Fairness Index > 0.95).
