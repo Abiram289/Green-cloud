@@ -147,109 +147,161 @@ class AIPredictorPlacement(PlacementAlgorithm):
         best_host = max(feasible_hosts, key=lambda x: x['probability'])
         return best_host['host_id']
 
-class BestFitPlacement(PlacementAlgorithm):
-    """Best-Fit placement algorithm - chooses host with minimum remaining resources after placement"""
-    
-    def __init__(self):
-        super().__init__("Best-Fit")
-    
-    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
-        best_host_id = -1
-        min_remaining_resources = float('inf')
-        
-        for host in hosts:
-            if self.can_place_vm(vm_request, host):
-                # Calculate remaining resources after placement
-                remaining_cpu = host["cpu_cores"] - host["current_cpu_usage"] - vm_request["cpu_required"]
-                remaining_ram = host["ram_gb"] - host["current_ram_usage"] - vm_request["ram_required"]
-                
-                # Total remaining resources (normalized)
-                total_remaining = remaining_cpu / host["cpu_cores"] + remaining_ram / host["ram_gb"]
-                
-                if total_remaining < min_remaining_resources:
-                    min_remaining_resources = total_remaining
-                    best_host_id = host["host_id"]
-        
-        return best_host_id
+class BestFitPlacement:
 
-class FirstFitPlacement(PlacementAlgorithm):
-    """First-Fit placement algorithm - chooses first suitable host"""
-    
-    def __init__(self):
-        super().__init__("First-Fit")
-    
+    """Best-Fit placement algorithm"""
+
     def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
-        for host in hosts:
-            if self.can_place_vm(vm_request, host):
-                return host["host_id"]
+
+        best_host = -1
+
+        min_remaining_capacity = float('inf')
+
+        
+
+        for i, host in enumerate(hosts):
+
+            if (host['current_cpu_usage'] + vm_request['cpu_required'] <= host['cpu_cores'] and
+
+                host['current_ram_usage'] + vm_request['ram_required'] <= host['ram_gb']):
+
+                
+
+                remaining_cpu = host['cpu_cores'] - (host['current_cpu_usage'] + vm_request['cpu_required'])
+
+                remaining_ram = host['ram_gb'] - (host['current_ram_usage'] + vm_request['ram_required'])
+
+                remaining_capacity = remaining_cpu + remaining_ram
+
+                
+
+                if remaining_capacity < min_remaining_capacity:
+
+                    min_remaining_capacity = remaining_capacity
+
+                    best_host = i
+
+        
+
+        return best_host
+
+
+
+class FirstFitPlacement:
+
+    """First-Fit placement algorithm"""
+
+    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
+
+        for i, host in enumerate(hosts):
+
+            if (host['current_cpu_usage'] + vm_request['cpu_required'] <= host['cpu_cores'] and
+
+                host['current_ram_usage'] + vm_request['ram_required'] <= host['ram_gb']):
+
+                return i
+
         return -1
 
-class WorstFitPlacement(PlacementAlgorithm):
-    """Worst-Fit placement algorithm - chooses host with maximum remaining resources"""
-    
-    def __init__(self):
-        super().__init__("Worst-Fit")
-    
-    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
-        best_host_id = -1
-        max_remaining_resources = -1
-        
-        for host in hosts:
-            if self.can_place_vm(vm_request, host):
-                # Calculate remaining resources after placement
-                remaining_cpu = host["cpu_cores"] - host["current_cpu_usage"] - vm_request["cpu_required"]
-                remaining_ram = host["ram_gb"] - host["current_ram_usage"] - vm_request["ram_required"]
-                
-                # Total remaining resources (normalized)
-                total_remaining = remaining_cpu / host["cpu_cores"] + remaining_ram / host["ram_gb"]
-                
-                if total_remaining > max_remaining_resources:
-                    max_remaining_resources = total_remaining
-                    best_host_id = host["host_id"]
-        
-        return best_host_id
 
-class RandomPlacement(PlacementAlgorithm):
-    """Random placement algorithm - randomly selects from feasible hosts"""
-    
-    def __init__(self):
-        super().__init__("Random")
-    
-    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
-        feasible_hosts = [host for host in hosts if self.can_place_vm(vm_request, host)]
-        
-        if not feasible_hosts:
-            return -1
-        
-        return random.choice(feasible_hosts)["host_id"]
 
-class RoundRobinPlacement(PlacementAlgorithm):
-    """Round-Robin placement algorithm - cycles through hosts"""
-    
-    def __init__(self):
-        super().__init__("Round-Robin")
-        self.last_host_index = -1
-    
+class WorstFitPlacement:
+
+    """Worst-Fit placement algorithm"""
+
     def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
-        if not hosts:
-            return -1
+
+        worst_host = -1
+
+        max_remaining_capacity = -1
+
         
-        # Find feasible hosts
-        feasible_hosts = [host for host in hosts if self.can_place_vm(vm_request, host)]
+
+        for i, host in enumerate(hosts):
+
+            if (host['current_cpu_usage'] + vm_request['cpu_required'] <= host['cpu_cores'] and
+
+                host['current_ram_usage'] + vm_request['ram_required'] <= host['ram_gb']):
+
+                
+
+                remaining_cpu = host['cpu_cores'] - (host['current_cpu_usage'] + vm_request['cpu_required'])
+
+                remaining_ram = host['ram_gb'] - (host['current_ram_usage'] + vm_request['ram_required'])
+
+                remaining_capacity = remaining_cpu + remaining_ram
+
+                
+
+                if remaining_capacity > max_remaining_capacity:
+
+                    max_remaining_capacity = remaining_capacity
+
+                    worst_host = i
+
         
-        if not feasible_hosts:
-            return -1
+
+        return worst_host
+
+
+
+class RandomPlacement:
+
+    """Random placement algorithm"""
+
+    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
+
+        feasible_hosts = []
+
+        for i, host in enumerate(hosts):
+
+            if (host['current_cpu_usage'] + vm_request['cpu_required'] <= host['cpu_cores'] and
+
+                host['current_ram_usage'] + vm_request['ram_required'] <= host['ram_gb']):
+
+                feasible_hosts.append(i)
+
         
-        # Get host IDs for round-robin selection
-        feasible_host_ids = [host["host_id"] for host in feasible_hosts]
+
+        if feasible_hosts:
+
+            return random.choice(feasible_hosts)
+
+        return -1
+
+
+
+class RoundRobinPlacement:
+
+    """Round-Robin placement algorithm"""
+
+    def __init__(self):
+
+        self.next_host = 0
+
         
-        # Select next host in round-robin fashion
-        if self.last_host_index >= len(feasible_host_ids) - 1:
-            self.last_host_index = 0
-        else:
-            self.last_host_index += 1
+
+    def place_vm(self, vm_request: Dict, hosts: List[Dict]) -> int:
+
+        for i in range(len(hosts)):
+
+            host_idx = (self.next_host + i) % len(hosts)
+
+            host = hosts[host_idx]
+
+            
+
+            if (host['current_cpu_usage'] + vm_request['cpu_required'] <= host['cpu_cores'] and
+
+                host['current_ram_usage'] + vm_request['ram_required'] <= host['ram_gb']):
+
+                self.next_host = (host_idx + 1) % len(hosts)
+
+                return host_idx
+
         
-        return feasible_host_ids[self.last_host_index]
+
+        return -1
 
 class PlacementMetricsCalculator:
     """Calculate placement metrics for evaluation"""

@@ -177,12 +177,76 @@ The evaluation, best viewed on the `/comparison` page of the web app, conclusive
 - For training, it calculates a `composite_score` for every possible placement to determine the "optimal host," which serves as the ground truth for the AI models.
 
 ## 8. Feature Engineering (50+ Features)
-- The AI's intelligence comes from a sophisticated feature engineering pipeline (`src/advanced_model_trainer.py`).
-- Over 50 features are created from the base data, including:
-  - **Efficiency Scores**: e.g., `cpu_efficiency_quadratic` to reward utilization near an optimal 70%.
-  - **Balance Scores**: e.g., `resource_balance_score` to measure the balance between CPU and RAM usage.
-  - **Cost/Energy Ratios**: To help the model understand the financial implications of its decisions.
-  - **Risk-Adjusted Metrics**: e.g., `risk_adjusted_efficiency`.
+The AI's intelligence comes from a sophisticated feature engineering pipeline (`src/advanced_model_trainer.py`). Over 50 features are created from the base data to provide the model with a deep, nuanced understanding of the data center's state. These features are not just raw numbers; they are carefully crafted to represent complex operational concepts like efficiency, risk, and balance.
+
+### 1. Enhanced Efficiency Features
+**Goal:** To guide the AI towards a 'sweet spot' of utilization (often 70-80%) where servers are efficient but not overloaded.
+
+- **`cpu_efficiency_quadratic` / `ram_efficiency_quadratic`**
+  - **Why Chosen:** Very low utilization is wasteful, while very high utilization increases queue times and risks performance degradation. This feature explicitly teaches the model this trade-off. The quadratic formula creates a strong, non-linear reward for being near the 70% target, penalizing distant values much more heavily than close ones.
+
+### 2. Resource Utilization, Balance, and Patterns
+**Goal:** To ensure that all resources on a host are used effectively, preventing 'stranded' resources.
+
+- **`resource_balance_score`**
+  - **Why Chosen:** An imbalanced host (e.g., 95% CPU, 20% RAM) is inefficient because the remaining RAM is unusable without available CPU. This feature incentivizes the AI to choose hosts where CPU and RAM are consumed in parallel, maximizing the host's overall capacity for future placements.
+
+- **`total_utilization` & `utilization_product`**
+  - **Why Chosen:** These provide simple but effective signals about a host's load. The product, in particular, can capture non-linear interactions, rewarding states where *both* CPU and RAM are moderately utilized over states where one is maxed out and the other is idle.
+
+### 3. Advanced Cost and Energy Features
+**Goal:** To make the financial and environmental costs of a placement decision first-class citizens in the AI's decision-making process.
+
+- **`cost_efficiency` & `energy_efficiency`**
+  - **Why Chosen:** These features move beyond pure technical metrics. They allow the AI to directly optimize for business goals like minimizing operational expenditure (OpEx) and reducing carbon footprint by linking resource allocation to its real-world cost and power draw.
+
+- **`cost_energy_ratio`**
+  - **Why Chosen:** This helps the AI navigate the complex trade-off between cost and energy. A cheap host may be power-hungry, and an energy-efficient one may be expensive. This ratio allows the AI to make an informed choice based on the specific optimization priority.
+
+### 4. Host Capacity and Load Features
+**Goal:** To give the AI a fundamental understanding of a host's size and current workload.
+
+- **`host_total_capacity` & `remaining_capacity`**
+  - **Why Chosen:** These are fundamental inputs. The AI must know the absolute size of a host and how much room is left to determine if a VM can even fit. This is the most basic constraint in any placement decision.
+
+- **`host_load_density`**
+  - **Why Chosen:** This provides a normalized view of how 'busy' a host is, averaged across its key resources. It's a more nuanced indicator of load than looking at CPU or RAM in isolation.
+
+### 5. VM Complexity and Priority Features
+**Goal:** To enable the AI to differentiate between VMs based on their size and expected duration.
+
+- **`vm_resource_intensity` & `vm_total_demand`**
+  - **Why Chosen:** Not all VMs are equal. A large, long-running VM represents a much larger commitment of resources than a small, transient one. These features allow the AI to understand the magnitude of a VM's request, which is crucial for long-term capacity planning.
+
+### 6. SLA and Risk Features
+**Goal:** To make the abstract concept of 'risk' a concrete, quantifiable metric that the AI can optimize against.
+
+- **`sla_safety_margin`**
+  - **Why Chosen:** Service Level Agreement (SLA) violations have direct financial and reputational costs. This feature translates the probability of a violation into a 'safety score,' making risk something the AI can actively avoid.
+
+- **`risk_adjusted_efficiency`**
+  - **Why Chosen:** This is a highly sophisticated feature that embodies a key principle of enterprise operations: efficiency is only good if it's reliable. It forces the AI to learn that a highly balanced and efficient host is a poor choice if it's on the verge of failure. It prioritizes stable, predictable performance.
+
+### 7. Ratio and Interaction Features
+**Goal:** To match the 'shape' of a VM's resource needs with the 'shape' of a host's available capacity.
+
+- **`cpu_to_ram_ratio` (VM) & `host_cpu_to_ram_ratio` (Host)**
+  - **Why Chosen:** These features define the 'shape' of a VM (e.g., 'CPU-heavy' or 'RAM-heavy') and a host. 
+
+- **`resource_match_score`**
+  - **Why Chosen:** This is the payoff for the ratio features. It directly scores how well a VM's shape fits a host's shape. A good match prevents stranded resources and leads to more efficient packing of VMs across the data center, maximizing overall throughput.
+
+### 8. Multi-objective Composite Features
+**Goal:** To combine multiple, sometimes competing, objectives into a single, balanced score.
+
+- **`energy_cost_composite` & `utilization_composite`**
+  - **Why Chosen:** The ultimate goal is not to be perfect at one thing, but to be great at everything simultaneously. These features create a single, unified metric from multiple normalized inputs, explicitly guiding the model towards a balanced decision that considers both business costs and technical efficiency.
+
+### 9. Polynomial Features for Key Metrics
+**Goal:** To allow the AI to learn and model non-linear relationships in the data.
+
+- **`..._squared` & `..._cubed` features**
+  - **Why Chosen:** The real world is not linear. For example, the risk of failure doesn't just increase with utilization; it often increases exponentially past a certain point. By providing squared and cubed versions of key metrics, we give the model the mathematical tools to capture these complex, non-linear patterns and make more accurate predictions.
 
 ## 9. Model Training Pipeline (`src/advanced_model_trainer.py`)
 - The project includes a full pipeline for training the advanced AI models.

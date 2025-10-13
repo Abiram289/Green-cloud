@@ -1,225 +1,430 @@
-{% extends "base.html" %}
-
-{% block title %}Interactive Demo - Enterprise VM Placement{% endblock %}
-
-{% block styles %}
+{% extends "base.html" %} {% block title %}Interactive Demo - Enterprise VM
+Placement{% endblock %} {% block styles %}
 <style>
-    .demo-container {
-        max-width: 900px;
-        margin: auto;
+  .demo-container {
+    max-width: 900px;
+    margin: auto;
+  }
+  .demo-step {
+    display: none;
+  }
+  .demo-step.active {
+    display: block;
+  }
+  .host-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .host {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    min-height: 200px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .host.compliant {
+    border-color: #198754;
+    background-color: #e8f5e9;
+  }
+  .host-title {
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  .vm {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 3px;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: place-vm 0.5s forwards;
+  }
+  .vm.hipaa {
+    background-color: #198754;
+  }
+  .vm-request-list {
+    list-style: none;
+    padding: 0;
+  }
+  .vm-request-list li {
+    background: #eee;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  @keyframes place-vm {
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    .demo-step {
-        display: none;
-    }
-    .demo-step.active {
-        display: block;
-    }
-    .host-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-    .host {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 1rem;
-        background-color: #f9f9f9;
-        min-height: 200px;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-    .host.compliant {
-        border-color: #198754;
-        background-color: #e8f5e9;
-    }
-    .host-title {
-        font-weight: bold;
-        font-size: 0.9rem;
-        text-align: center;
-        margin-bottom: 0.5rem;
-    }
-    .vm {
-        background-color: #0d6efd;
-        color: white;
-        padding: 0.5rem;
-        border-radius: 3px;
-        margin-top: 0.5rem;
-        font-size: 0.8rem;
-        text-align: center;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: place-vm 0.5s forwards;
-    }
-    .vm.hipaa {
-        background-color: #198754;
-    }
-    .vm-request-list {
-        list-style: none;
-        padding: 0;
-    }
-    .vm-request-list li {
-        background: #eee; 
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-    @keyframes place-vm {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .takeaway {
-        font-size: 1.1rem;
-        font-style: italic;
-        color: #555;
-    }
+  }
+  .takeaway {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #555;
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="demo-container">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">
-            <i class="bi bi-play-circle me-2"></i>Interactive AI Demo
-        </h1>
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+  >
+    <h1 class="h2">
+      <i class="bi bi-play-circle me-2"></i>Interactive AI Demo
+    </h1>
+  </div>
+
+  <!-- Demo Step 1: The Scenario -->
+  <div id="step-1" class="demo-step active">
+    <h4>Step 1: The Scenario</h4>
+    <p>
+      We have four available servers (hosts) in our data center. One of them is
+      specially configured to be <strong>HIPAA Compliant</strong>. We also have
+      three incoming Virtual Machine (VM) placement requests.
+    </p>
+    <div class="row">
+      <div class="col-md-8">
+        <h5>Available Hosts:</h5>
+        <div class="host-grid" id="scenario-hosts">
+          <div class="host"><div class="host-title">Host 1</div></div>
+          <div class="host compliant">
+            <div class="host-title">Host 2 (HIPAA)</div>
+          </div>
+          <div class="host"><div class="host-title">Host 3</div></div>
+          <div class="host"><div class="host-title">Host 4</div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <h5>Incoming VM Requests:</h5>
+        <ul class="vm-request-list">
+          <li><strong>Large DB Server</strong></li>
+          <li class="text-success">
+            <strong>Patient Records DB (HIPAA)</strong>
+          </li>
+          <li><strong>Web Server</strong></li>
+        </ul>
+      </div>
+    </div>
+    <p class="mt-3 takeaway">
+      The challenge is to place all three VMs efficiently without violating the
+      HIPAA compliance rule for the patient database.
+    </p>
+  </div>
+
+  <!-- Demo Step 2: The Naive Solution -->
+  <div id="step-2" class="demo-step">
+    <h4>Step 2: The Naive `Best-Fit` Solution</h4>
+    <p>
+      A simple algorithm like `Best-Fit` only cares about one thing: packing VMs
+      as tightly as possible. It completely ignores compliance rules and load
+      balancing.
+    </p>
+    <div class="host-grid" id="best-fit-hosts">
+      <div class="host"><div class="host-title">Host 1</div></div>
+      <div class="host compliant">
+        <div class="host-title">Host 2 (HIPAA)</div>
+      </div>
+      <div class="host"><div class="host-title">Host 3</div></div>
+      <div class="host"><div class="host-title">Host 4</div></div>
+    </div>
+    <div class="alert alert-danger mt-3">
+      <strong>Result: Failure!</strong> `Best-Fit` creates a "hotspot" on Host 1
+      and, most critically, it places the sensitive patient database on a
+      non-compliant server, resulting in a major
+      <strong>compliance violation</strong>.
+    </div>
+  </div>
+
+  <!-- Demo Step 3: The AI Model Solution -->
+  <div id="step-3" class="demo-step">
+    <h4>Step 3: The <strong>AI Model</strong> Solution</h4>
+    <p>
+      The <strong>AI Model</strong> analyzes over 50 features, including
+      compliance needs, host load, and energy efficiency, to find the optimal
+      placement for every VM.
+    </p>
+    <div class="host-grid" id="ai-model-hosts">
+      <div class="host"><div class="host-title">Host 1</div></div>
+      <div class="host compliant">
+        <div class="host-title">Host 2 (HIPAA)</div>
+      </div>
+      <div class="host"><div class="host-title">Host 3</div></div>
+      <div class="host"><div class="host-title">Host 4</div></div>
+    </div>
+    <div class="alert alert-success mt-3">
+      <strong>Result: Success!</strong> The AI correctly places the HIPAA
+      workload on the compliant host and intelligently balances the other VMs
+      across the remaining hosts, resulting in an efficient, stable, and fully
+      compliant data center.
+    </div>
+  </div>
+
+  <!-- Demo Step 4: AI Performance Demonstration -->
+  <div id="step-4" class="demo-step">
+    <h4>Step 4: AI Performance Demonstration</h4>
+    <p>
+      Let's see how our AI algorithms perform against classical algorithms in a
+      real test scenario.
+    </p>
+
+    <div class="text-center mb-4">
+      <button id="run-performance-test" class="btn btn-primary btn-lg">
+        <i class="bi bi-play-circle me-2"></i>Run Performance Test
+      </button>
     </div>
 
-    <!-- Demo Step 1: The Scenario -->
-    <div id="step-1" class="demo-step active">
-        <h4>Step 1: The Scenario</h4>
-        <p>We have four available servers (hosts) in our data center. One of them is specially configured to be <strong>HIPAA Compliant</strong>. We also have three incoming Virtual Machine (VM) placement requests.</p>
-        <div class="row">
-            <div class="col-md-8">
-                <h5>Available Hosts:</h5>
-                <div class="host-grid" id="scenario-hosts">
-                    <div class="host"><div class="host-title">Host 1</div></div>
-                    <div class="host compliant"><div class="host-title">Host 2 (HIPAA)</div></div>
-                    <div class="host"><div class="host-title">Host 3</div></div>
-                    <div class="host"><div class="host-title">Host 4</div></div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <h5>Incoming VM Requests:</h5>
-                <ul class="vm-request-list">
-                    <li><strong>Large DB Server</strong></li>
-                    <li class="text-success"><strong>Patient Records DB (HIPAA)</strong></li>
-                    <li><strong>Web Server</strong></li>
-                </ul>
-            </div>
+    <div id="performance-results" style="display: none">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>Energy Consumption (Lower = Better)</h5>
+          <div id="energy-chart" style="height: 300px"></div>
         </div>
-        <p class="mt-3 takeaway">The challenge is to place all three VMs efficiently without violating the HIPAA compliance rule for the patient database.</p>
-    </div>
+        <div class="col-md-6">
+          <h5>Cost (Lower = Better)</h5>
+          <div id="cost-chart" style="height: 300px"></div>
+        </div>
+      </div>
 
-    <!-- Demo Step 2: The Naive Solution -->
-    <div id="step-2" class="demo-step">
-        <h4>Step 2: The Naive `Best-Fit` Solution</h4>
-        <p>A simple algorithm like `Best-Fit` only cares about one thing: packing VMs as tightly as possible. It completely ignores compliance rules and load balancing.</p>
-        <div class="host-grid" id="best-fit-hosts">
-            <div class="host"><div class="host-title">Host 1</div></div>
-            <div class="host compliant"><div class="host-title">Host 2 (HIPAA)</div></div>
-            <div class="host"><div class="host-title">Host 3</div></div>
-            <div class="host"><div class="host-title">Host 4</div></div>
-        </div>
-        <div class="alert alert-danger mt-3">
-            <strong>Result: Failure!</strong> `Best-Fit` creates a "hotspot" on Host 1 and, most critically, it places the sensitive patient database on a non-compliant server, resulting in a major <strong>compliance violation</strong>.
-        </div>
+      <div
+        class="alert alert-success mt-3"
+        id="improvement-alert"
+        style="display: none"
+      >
+        <h5><i class="bi bi-trophy me-2"></i>AI Superiority Demonstrated!</h5>
+        <p id="improvement-text"></p>
+      </div>
     </div>
+  </div>
 
-    <!-- Demo Step 3: The Hybrid-AI Solution -->
-    <div id="step-3" class="demo-step">
-        <h4>Step 3: The <strong>Hybrid-AI</strong> Solution</h4>
-        <p>The <strong>Hybrid-AI</strong> analyzes over 50 features, including compliance needs, host load, and energy efficiency, to find the optimal placement for every VM.</p>
-        <div class="host-grid" id="hybrid-ai-hosts">
-            <div class="host"><div class="host-title">Host 1</div></div>
-            <div class="host compliant"><div class="host-title">Host 2 (HIPAA)</div></div>
-            <div class="host"><div class="host-title">Host 3</div></div>
-            <div class="host"><div class="host-title">Host 4</div></div>
-        </div>
-        <div class="alert alert-success mt-3">
-            <strong>Result: Success!</strong> The AI correctly places the HIPAA workload on the compliant host and intelligently balances the other VMs across the remaining hosts, resulting in an efficient, stable, and fully compliant data center.
-        </div>
+  <!-- Demo Step 5: Conclusion -->
+  <div id="step-5" class="demo-step">
+    <div class="card text-center">
+      <div class="card-body">
+        <h2 class="card-title">Conclusion</h2>
+        <p class="lead">
+          This demonstration shows why AI-enhanced placement is essential.
+        </p>
+        <p>
+          Our AI algorithms consistently outperform classical algorithms by
+          <strong id="energy-improvement">0</strong>% in energy efficiency and
+          <strong id="cost-improvement">0</strong>% in cost optimization, while
+          maintaining compliance and load balancing.
+        </p>
+        <a href="/comparison" class="btn btn-primary btn-lg"
+          >View Full Comparison Report</a
+        >
+      </div>
     </div>
+  </div>
 
-    <!-- Demo Step 4: Conclusion -->
-    <div id="step-4" class="demo-step">
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="card-title">Conclusion</h2>
-                <p class="lead">This simple scenario shows why a multi-objective AI is essential.</p>
-                <p>Simple algorithms fail when faced with real-world complexity. The <strong>Hybrid-AI</strong> succeeds because it was designed to understand and balance these competing objectives, delivering a solution that is not only efficient but also reliable and compliant.</p>
-                <a href="/comparison" class="btn btn-primary btn-lg">View Full Comparison Report</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="d-flex justify-content-between mt-4">
-        <button id="prev-btn" class="btn btn-secondary" onclick="prevStep()" disabled>Previous</button>
-        <button id="next-btn" class="btn btn-primary" onclick="nextStep()">Next</button>
-    </div>
+  <!-- Navigation -->
+  <div class="d-flex justify-content-between mt-4">
+    <button
+      id="prev-btn"
+      class="btn btn-secondary"
+      onclick="prevStep()"
+      disabled
+    >
+      Previous
+    </button>
+    <button id="next-btn" class="btn btn-primary" onclick="nextStep()">
+      Next
+    </button>
+  </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    let currentStep = 1;
-    const totalSteps = 4;
+  let currentStep = 1;
+  const totalSteps = 5;
 
-    const nextBtn = document.getElementById('next-btn');
-    const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById("next-btn");
+  const prevBtn = document.getElementById("prev-btn");
 
-    function showStep(step) {
-        document.querySelectorAll('.demo-step').forEach(el => el.classList.remove('active'));
-        document.getElementById(`step-${step}`).classList.add('active');
-        currentStep = step;
-        updateNavButtons();
-        runStepAnimation(step);
+  function showStep(step) {
+    document
+      .querySelectorAll(".demo-step")
+      .forEach((el) => el.classList.remove("active"));
+    document.getElementById(`step-${step}`).classList.add("active");
+    currentStep = step;
+    updateNavButtons();
+    runStepAnimation(step);
+  }
+
+  function nextStep() {
+    if (currentStep < totalSteps) {
+      showStep(currentStep + 1);
     }
+  }
 
-    function nextStep() {
-        if (currentStep < totalSteps) {
-            showStep(currentStep + 1);
-        }
+  function prevStep() {
+    if (currentStep > 1) {
+      showStep(currentStep - 1);
     }
+  }
 
-    function prevStep() {
-        if (currentStep > 1) {
-            showStep(currentStep - 1);
-        }
+  function updateNavButtons() {
+    prevBtn.disabled = currentStep === 1;
+    if (currentStep === totalSteps) {
+      nextBtn.textContent = "Finish Demo";
+      nextBtn.onclick = () => (window.location.href = "/comparison");
+    } else {
+      nextBtn.textContent = "Next";
+      nextBtn.onclick = nextStep;
     }
+  }
 
-    function updateNavButtons() {
-        prevBtn.disabled = currentStep === 1;
-        if (currentStep === totalSteps) {
-            nextBtn.textContent = 'Finish Demo';
-            nextBtn.onclick = () => window.location.href = '/comparison';
-        } else {
-            nextBtn.textContent = 'Next';
-            nextBtn.onclick = nextStep;
-        }
+  function runStepAnimation(step) {
+    if (step === 2) {
+      const host = document.querySelector("#best-fit-hosts .host:first-child");
+      host.innerHTML = '<div class="host-title">Host 1</div>'; // Clear previous
+      setTimeout(
+        () => (host.innerHTML += '<div class="vm">Large DB Server</div>'),
+        100
+      );
+      setTimeout(
+        () =>
+          (host.innerHTML +=
+            '<div class="vm vm-hipaa">Patient Records DB (HIPAA)</div>'),
+        600
+      );
+      setTimeout(
+        () => (host.innerHTML += '<div class="vm">Web Server</div>'),
+        1100
+      );
     }
-
-    function runStepAnimation(step) {
-        if (step === 2) {
-            const host = document.querySelector('#best-fit-hosts .host:first-child');
-            host.innerHTML = '<div class="host-title">Host 1</div>'; // Clear previous
-            setTimeout(() => host.innerHTML += '<div class="vm">Large DB Server</div>', 100);
-            setTimeout(() => host.innerHTML += '<div class="vm vm-hipaa">Patient Records DB (HIPAA)</div>', 600);
-            setTimeout(() => host.innerHTML += '<div class="vm">Web Server</div>', 1100);
-        }
-        if (step === 3) {
-            const hosts = document.querySelectorAll('#hybrid-ai-hosts .host');
-            hosts[0].innerHTML = '<div class="host-title">Host 1</div>';
-            hosts[1].innerHTML = '<div class="host-title">Host 2 (HIPAA)</div>';
-            hosts[2].innerHTML = '<div class="host-title">Host 3</div>';
-            setTimeout(() => hosts[0].innerHTML += '<div class="vm">Large DB Server</div>', 100);
-            setTimeout(() => hosts[1].innerHTML += '<div class="vm vm-hipaa">Patient Records DB (HIPAA)</div>', 600);
-            setTimeout(() => hosts[2].innerHTML += '<div class="vm">Web Server</div>', 1100);
-        }
+    if (step === 3) {
+      const hosts = document.querySelectorAll("#ai-model-hosts .host");
+      hosts[0].innerHTML = '<div class="host-title">Host 1</div>';
+      hosts[1].innerHTML = '<div class="host-title">Host 2 (HIPAA)</div>';
+      hosts[2].innerHTML = '<div class="host-title">Host 3</div>';
+      setTimeout(
+        () => (hosts[0].innerHTML += '<div class="vm">Large DB Server</div>'),
+        100
+      );
+      setTimeout(
+        () =>
+          (hosts[1].innerHTML +=
+            '<div class="vm vm-hipaa">Patient Records DB (HIPAA)</div>'),
+        600
+      );
+      setTimeout(
+        () => (hosts[2].innerHTML += '<div class="vm">Web Server</div>'),
+        1100
+      );
     }
+  }
 
-    // Initialize
-    showStep(1);
+  // Performance test functionality
+  document
+    .getElementById("run-performance-test")
+    .addEventListener("click", async function () {
+      const button = this;
+      const originalText = button.innerHTML;
+
+      button.innerHTML =
+        '<i class="bi bi-hourglass-split me-2"></i>Running Test...';
+      button.disabled = true;
+
+      try {
+        const response = await fetch("/api/ai_performance_demo");
+        const data = await response.json();
+
+        if (data.results) {
+          displayPerformanceResults(data);
+          document.getElementById("performance-results").style.display =
+            "block";
+
+          // Update conclusion with actual improvements
+          document.getElementById("energy-improvement").textContent =
+            data.improvements.energy_improvement;
+          document.getElementById("cost-improvement").textContent =
+            data.improvements.cost_improvement;
+        }
+      } catch (error) {
+        console.error("Performance test failed:", error);
+        alert("Performance test failed. Please try again.");
+      } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }
+    });
+
+  function displayPerformanceResults(data) {
+    const results = data.results;
+    const algorithms = Object.keys(results);
+
+    // Energy chart
+    const energyData = algorithms.map((alg) => ({
+      algorithm: alg,
+      energy: results[alg].total_energy,
+    }));
+
+    // Cost chart
+    const costData = algorithms.map((alg) => ({
+      algorithm: alg,
+      cost: results[alg].total_cost,
+    }));
+
+    // Create simple bar charts using HTML/CSS
+    createSimpleChart("energy-chart", energyData, "energy", "Energy (Watts)");
+    createSimpleChart("cost-chart", costData, "cost", "Cost ($)");
+
+    // Show improvement alert if AI is superior
+    if (data.improvements.ai_superiority) {
+      const alert = document.getElementById("improvement-alert");
+      const text = document.getElementById("improvement-text");
+      text.textContent = `AI algorithms achieve ${data.improvements.energy_improvement}% better energy efficiency and ${data.improvements.cost_improvement}% better cost optimization compared to classical algorithms!`;
+      alert.style.display = "block";
+    }
+  }
+
+  function createSimpleChart(containerId, data, valueKey, label) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    const maxValue = Math.max(...data.map((d) => d[valueKey]));
+
+    data.forEach((item) => {
+      const bar = document.createElement("div");
+      bar.style.marginBottom = "10px";
+      bar.style.display = "flex";
+      bar.style.alignItems = "center";
+
+      const labelDiv = document.createElement("div");
+      labelDiv.textContent = item.algorithm;
+      labelDiv.style.width = "120px";
+      labelDiv.style.fontSize = "12px";
+
+      const barDiv = document.createElement("div");
+      barDiv.style.height = "20px";
+      barDiv.style.backgroundColor = item.algorithm.includes("AI")
+        ? "#FF6B6B"
+        : "#4ECDC4";
+      barDiv.style.width = `${(item[valueKey] / maxValue) * 200}px`;
+      barDiv.style.marginRight = "10px";
+      barDiv.style.borderRadius = "3px";
+
+      const valueDiv = document.createElement("div");
+      valueDiv.textContent = Math.round(item[valueKey]);
+      valueDiv.style.fontSize = "12px";
+      valueDiv.style.fontWeight = "bold";
+
+      bar.appendChild(labelDiv);
+      bar.appendChild(barDiv);
+      bar.appendChild(valueDiv);
+      container.appendChild(bar);
+    });
+  }
+
+  // Initialize
+  showStep(1);
 </script>
 {% endblock %}

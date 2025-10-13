@@ -1,0 +1,541 @@
+{% extends "base.html" %} {% block title %}Detailed AI Performance Dashboard{%
+endblock %} {% block styles %}
+<style>
+  .metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .metric-card.ai-superior {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+
+  .metric-card.classical {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  }
+
+  .comparison-table {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .comparison-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    padding: 15px;
+  }
+
+  .comparison-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .comparison-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .ai-row {
+    background-color: #e8f5e9 !important;
+    font-weight: 600;
+  }
+
+  .performance-chart {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .improvement-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+  }
+
+  .improvement-positive {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .improvement-negative {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+  }
+
+  .real-time-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+  >
+    <h1 class="h2">
+      <i class="bi bi-graph-up me-2"></i>Detailed AI Performance Dashboard
+      <span class="real-time-indicator ms-2" title="Live Data"></span>
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <button id="refresh-data" class="btn btn-primary">
+        <i class="bi bi-arrow-clockwise me-1"></i>Refresh Data
+      </button>
+      <button id="run-comparison" class="btn btn-success ms-2">
+        <i class="bi bi-play-circle me-1"></i>Run Comparison
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Running comprehensive comparison...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div id="main-content">
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="metric-card ai-superior">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 id="ai-energy-score">-</h3>
+              <p class="mb-0">AI Energy Efficiency</p>
+            </div>
+            <i class="bi bi-lightning-charge fs-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="metric-card ai-superior">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 id="ai-cost-score">-</h3>
+              <p class="mb-0">AI Cost Optimization</p>
+            </div>
+            <i class="bi bi-currency-dollar fs-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="metric-card ai-superior">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 id="ai-success-rate">-</h3>
+              <p class="mb-0">AI Success Rate</p>
+            </div>
+            <i class="bi bi-check-circle fs-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="metric-card ai-superior">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 id="ai-performance-score">-</h3>
+              <p class="mb-0">Overall Performance</p>
+            </div>
+            <i class="bi bi-trophy fs-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI vs Classical Comparison -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="performance-chart">
+          <h4 class="mb-3">
+            <i class="bi bi-bar-chart me-2"></i>AI vs Classical Algorithms
+            Performance
+          </h4>
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Energy Consumption (Lower = Better)</h6>
+              <div id="energy-comparison-chart" style="height: 300px"></div>
+            </div>
+            <div class="col-md-6">
+              <h6>Cost Optimization (Lower = Better)</h6>
+              <div id="cost-comparison-chart" style="height: 300px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Comparison Table -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="comparison-table">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Success Rate</th>
+                <th>Energy (W)</th>
+                <th>Cost ($)</th>
+                <th>Avg Placement Time (ms)</th>
+                <th>Load Balance Score</th>
+                <th>Performance Score</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-table-body">
+              <!-- Data will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Improvement Metrics -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="metric-card">
+          <h5><i class="bi bi-arrow-up-circle me-2"></i>Energy Improvement</h5>
+          <h2 id="energy-improvement">-</h2>
+          <p class="mb-0">AI vs Best Classical</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="metric-card">
+          <h5><i class="bi bi-arrow-up-circle me-2"></i>Cost Improvement</h5>
+          <h2 id="cost-improvement">-</h2>
+          <p class="mb-0">AI vs Best Classical</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="metric-card">
+          <h5><i class="bi bi-arrow-up-circle me-2"></i>Success Improvement</h5>
+          <h2 id="success-improvement">-</h2>
+          <p class="mb-0">AI vs Best Classical</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-time System Status -->
+    <div class="row">
+      <div class="col-12">
+        <div class="performance-chart">
+          <h4 class="mb-3">
+            <i class="bi bi-activity me-2"></i>Real-time System Status
+          </h4>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="text-center">
+                <h5 id="total-vms">-</h5>
+                <p class="text-muted">Total VMs Tested</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h5 id="total-hosts">-</h5>
+                <p class="text-muted">Available Hosts</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h5 id="test-duration">-</h5>
+                <p class="text-muted">Test Duration (s)</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h5 id="last-updated">-</h5>
+                <p class="text-muted">Last Updated</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  let comparisonData = null;
+
+  // Initialize dashboard
+  document.addEventListener("DOMContentLoaded", function () {
+    loadComparisonData();
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadComparisonData, 30000);
+  });
+
+  // Refresh button
+  document
+    .getElementById("refresh-data")
+    .addEventListener("click", function () {
+      loadComparisonData();
+    });
+
+  // Run comparison button
+  document
+    .getElementById("run-comparison")
+    .addEventListener("click", function () {
+      runNewComparison();
+    });
+
+  async function loadComparisonData() {
+    try {
+      showLoading(true);
+      const response = await fetch("/api/detailed_comparison");
+      const data = await response.json();
+
+      if (data.results) {
+        comparisonData = data;
+        updateDashboard(data);
+        showLoading(false);
+      }
+    } catch (error) {
+      console.error("Error loading comparison data:", error);
+      showLoading(false);
+    }
+  }
+
+  async function runNewComparison() {
+    try {
+      showLoading(true);
+      const response = await fetch("/api/detailed_comparison");
+      const data = await response.json();
+
+      if (data.results) {
+        comparisonData = data;
+        updateDashboard(data);
+        showLoading(false);
+
+        // Show success message
+        showNotification("New comparison completed successfully!", "success");
+      }
+    } catch (error) {
+      console.error("Error running comparison:", error);
+      showLoading(false);
+      showNotification("Error running comparison. Please try again.", "error");
+    }
+  }
+
+  function updateDashboard(data) {
+    const results = data.results;
+    const comparison = data.comparison;
+
+    // Update key metrics
+    const aiResults = results["AI Model"];
+    document.getElementById(
+      "ai-energy-score"
+    ).textContent = `${aiResults.avg_energy.toFixed(0)}W`;
+    document.getElementById(
+      "ai-cost-score"
+    ).textContent = `$${aiResults.avg_cost.toFixed(0)}`;
+    document.getElementById("ai-success-rate").textContent = `${(
+      aiResults.success_rate * 100
+    ).toFixed(1)}%`;
+    document.getElementById("ai-performance-score").textContent =
+      comparison.ai_vs_classical.ai_performance_score.toFixed(2);
+
+    // Update improvement metrics
+    document.getElementById(
+      "energy-improvement"
+    ).innerHTML = `<span class="improvement-badge improvement-positive">+${comparison.ai_vs_classical.energy_improvement}%</span>`;
+    document.getElementById(
+      "cost-improvement"
+    ).innerHTML = `<span class="improvement-badge improvement-positive">+${comparison.ai_vs_classical.cost_improvement}%</span>`;
+    document.getElementById(
+      "success-improvement"
+    ).innerHTML = `<span class="improvement-badge improvement-positive">+${comparison.ai_vs_classical.success_improvement}%</span>`;
+
+    // Update comparison table
+    updateComparisonTable(results);
+
+    // Update charts
+    updateCharts(results);
+
+    // Update system status
+    document.getElementById("total-vms").textContent =
+      data.test_config.vm_requests;
+    document.getElementById("total-hosts").textContent = data.test_config.hosts;
+    document.getElementById("test-duration").textContent =
+      data.test_config.test_duration;
+    document.getElementById("last-updated").textContent = new Date(
+      data.timestamp
+    ).toLocaleTimeString();
+  }
+
+  function updateComparisonTable(results) {
+    const tbody = document.getElementById("comparison-table-body");
+    tbody.innerHTML = "";
+
+    const algorithms = [
+      "AI Model",
+      "Best-Fit",
+      "First-Fit",
+      "Worst-Fit",
+      "Random",
+      "Round-Robin",
+    ];
+
+    algorithms.forEach((algName) => {
+      if (results[algName]) {
+        const result = results[algName];
+        const row = document.createElement("tr");
+
+        if (algName === "AI Model") {
+          row.classList.add("ai-row");
+        }
+
+        row.innerHTML = `
+                    <td><strong>${algName}</strong></td>
+                    <td>${(result.success_rate * 100).toFixed(1)}%</td>
+                    <td>${result.total_energy.toFixed(0)}</td>
+                    <td>$${result.total_cost.toFixed(0)}</td>
+                    <td>${(result.avg_placement_time * 1000).toFixed(2)}</td>
+                    <td>${result.load_balance_score.toFixed(3)}</td>
+                    <td>${result.energy_efficiency.toFixed(3)}</td>
+                `;
+
+        tbody.appendChild(row);
+      }
+    });
+  }
+
+  function updateCharts(results) {
+    // Energy comparison chart
+    const energyData = Object.entries(results).map(([name, data]) => ({
+      algorithm: name,
+      energy: data.total_energy,
+    }));
+    createSimpleChart(
+      "energy-comparison-chart",
+      energyData,
+      "energy",
+      "Energy (W)"
+    );
+
+    // Cost comparison chart
+    const costData = Object.entries(results).map(([name, data]) => ({
+      algorithm: name,
+      cost: data.total_cost,
+    }));
+    createSimpleChart("cost-comparison-chart", costData, "cost", "Cost ($)");
+  }
+
+  function createSimpleChart(containerId, data, valueKey, label) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    const maxValue = Math.max(...data.map((d) => d[valueKey]));
+
+    data.forEach((item) => {
+      const bar = document.createElement("div");
+      bar.style.marginBottom = "10px";
+      bar.style.display = "flex";
+      bar.style.alignItems = "center";
+
+      const labelDiv = document.createElement("div");
+      labelDiv.textContent = item.algorithm;
+      labelDiv.style.width = "120px";
+      labelDiv.style.fontSize = "12px";
+      labelDiv.style.fontWeight =
+        item.algorithm === "AI Model" ? "bold" : "normal";
+
+      const barDiv = document.createElement("div");
+      barDiv.style.height = "20px";
+      barDiv.style.backgroundColor =
+        item.algorithm === "AI Model" ? "#28a745" : "#6c757d";
+      barDiv.style.width = `${(item[valueKey] / maxValue) * 200}px`;
+      barDiv.style.marginRight = "10px";
+      barDiv.style.borderRadius = "3px";
+
+      const valueDiv = document.createElement("div");
+      valueDiv.textContent = Math.round(item[valueKey]);
+      valueDiv.style.fontSize = "12px";
+      valueDiv.style.fontWeight = "bold";
+
+      bar.appendChild(labelDiv);
+      bar.appendChild(barDiv);
+      bar.appendChild(valueDiv);
+      container.appendChild(bar);
+    });
+  }
+
+  function showLoading(show) {
+    document.getElementById("loading-spinner").style.display = show
+      ? "block"
+      : "none";
+    document.getElementById("main-content").style.display = show
+      ? "none"
+      : "block";
+  }
+
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `alert alert-${
+      type === "success" ? "success" : "danger"
+    } alert-dismissible fade show position-fixed`;
+    notification.style.top = "20px";
+    notification.style.right = "20px";
+    notification.style.zIndex = "9999";
+    notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+    document.body.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 5000);
+  }
+</script>
+{% endblock %}
+

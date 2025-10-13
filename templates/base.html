@@ -1,341 +1,490 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Enterprise VM Placement System{% endblock %}</title>
-    
+
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-color: #2E8B57;
-            --secondary-color: #3498db;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --info-color: #17a2b8;
-            --light-bg: #f8f9fa;
-            --dark-bg: #343a40;
-        }
+      :root {
+        --primary-color: #2e8b57;
+        --secondary-color: #3498db;
+        --success-color: #2ecc71;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --info-color: #17a2b8;
+        --light-bg: #f8f9fa;
+        --dark-bg: #343a40;
+      }
 
-        body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      body {
+        background-color: var(--light-bg);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-        }
+      .navbar-brand {
+        font-weight: 700;
+        color: var(--primary-color) !important;
+      }
 
+      .sidebar {
+        background: linear-gradient(
+          180deg,
+          var(--primary-color) 0%,
+          #245d42 100%
+        );
+        min-height: 100vh;
+        padding: 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar .nav-link {
+        color: white !important;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+      }
+
+      .sidebar .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-left: 4px solid white;
+      }
+
+      .card {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+      }
+
+      .card-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--secondary-color) 100%
+        );
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        border: none;
+        padding: 15px 20px;
+      }
+
+      .metric-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 20px;
+      }
+
+      .metric-card.success {
+        background: linear-gradient(
+          135deg,
+          var(--success-color) 0%,
+          #27ae60 100%
+        );
+      }
+      .metric-card.warning {
+        background: linear-gradient(
+          135deg,
+          var(--warning-color) 0%,
+          #e67e22 100%
+        );
+      }
+      .metric-card.danger {
+        background: linear-gradient(
+          135deg,
+          var(--danger-color) 0%,
+          #c0392b 100%
+        );
+      }
+      .metric-card.info {
+        background: linear-gradient(135deg, var(--info-color) 0%, #3498db 100%);
+      }
+
+      .metric-card h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .metric-card p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+      }
+
+      .table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .table thead {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background: #245d42;
+        border-color: #245d42;
+        transform: translateY(-2px);
+      }
+
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .status-active {
+        background: var(--success-color);
+        color: white;
+      }
+      .status-warning {
+        background: var(--warning-color);
+        color: white;
+      }
+      .status-inactive {
+        background: var(--danger-color);
+        color: white;
+      }
+
+      .progress-bar {
+        background: var(--primary-color);
+      }
+
+      .compliance-score {
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .spinner-border {
+        color: var(--primary-color);
+      }
+
+      @media (max-width: 768px) {
         .sidebar {
-            background: linear-gradient(180deg, var(--primary-color) 0%, #245d42 100%);
-            min-height: 100vh;
-            padding: 0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+          position: fixed;
+          left: -250px;
+          width: 250px;
+          z-index: 1000;
+          transition: left 0.3s ease;
         }
 
-        .sidebar .nav-link {
-            color: white !important;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
+        .sidebar.show {
+          left: 0;
         }
 
-        .sidebar .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-            transform: translateX(5px);
+        .main-content {
+          margin-left: 0 !important;
         }
-
-        .sidebar .nav-link.active {
-            background-color: rgba(255,255,255,0.2);
-            border-left: 4px solid white;
-        }
-
-        .card {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: none;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
-            border: none;
-            padding: 15px 20px;
-        }
-
-        .metric-card {
-            text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .metric-card.success { background: linear-gradient(135deg, var(--success-color) 0%, #27ae60 100%); }
-        .metric-card.warning { background: linear-gradient(135deg, var(--warning-color) 0%, #e67e22 100%); }
-        .metric-card.danger { background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%); }
-        .metric-card.info { background: linear-gradient(135deg, var(--info-color) 0%, #3498db 100%); }
-
-        .metric-card h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .metric-card p {
-            margin: 5px 0 0 0;
-            opacity: 0.9;
-        }
-
-        .table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .table thead {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #245d42;
-            border-color: #245d42;
-            transform: translateY(-2px);
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status-active { background: var(--success-color); color: white; }
-        .status-warning { background: var(--warning-color); color: white; }
-        .status-inactive { background: var(--danger-color); color: white; }
-
-        .progress-bar {
-            background: var(--primary-color);
-        }
-
-        .compliance-score {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner-border {
-            color: var(--primary-color);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -250px;
-                width: 250px;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-            
-            .sidebar.show {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container-fluid">
-            <button class="btn btn-outline-primary d-lg-none me-2" type="button" onclick="toggleSidebar()">
-                <i class="bi bi-list"></i>
-            </button>
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-cloud-check me-2"></i>Enterprise VM Placement
+      <div class="container-fluid">
+        <button
+          class="btn btn-outline-primary d-lg-none me-2"
+          type="button"
+          onclick="toggleSidebar()"
+        >
+          <i class="bi bi-list"></i>
+        </button>
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-cloud-check me-2"></i>Enterprise VM Placement
+        </a>
+        <div class="navbar-nav ms-auto">
+          <div class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              <i class="bi bi-person-circle me-1"></i>Admin User
             </a>
-            <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle me-1"></i>Admin User
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
-                </div>
-            </div>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="bi bi-gear me-2"></i>Settings</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="bi bi-box-arrow-right me-2"></i>Logout</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
     </nav>
 
     <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-lg-2 sidebar" id="sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="/">
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'placement_form' %}active{% endif %}" href="/placement">
-                                <i class="bi bi-plus-circle me-2"></i>VM Placement
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'hosts_view' %}active{% endif %}" href="/hosts">
-                                <i class="bi bi-server me-2"></i>Host Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'tenants_view' %}active{% endif %}" href="/tenants">
-                                <i class="bi bi-people me-2"></i>Tenant Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'analytics_view' %}active{% endif %}" href="/analytics">
-                                <i class="bi bi-graph-up me-2"></i>Analytics
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'comparison_view' %}active{% endif %}" href="/comparison">
-                                <i class="bi bi-bar-chart-line me-2"></i>Comparison
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'audit_view' %}active{% endif %}" href="/audit">
-                                <i class="bi bi-shield-check me-2"></i>Audit & Compliance
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'demo_view' %}active{% endif %}" href="/demo">
-                                <i class="bi bi-play-circle me-2"></i>Demo
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+      <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-lg-2 sidebar" id="sidebar">
+          <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+                  href="/"
+                >
+                  <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'placement_form' %}active{% endif %}"
+                  href="/placement"
+                >
+                  <i class="bi bi-plus-circle me-2"></i>VM Placement
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'hosts_view' %}active{% endif %}"
+                  href="/hosts"
+                >
+                  <i class="bi bi-server me-2"></i>Host Management
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'tenants_view' %}active{% endif %}"
+                  href="/tenants"
+                >
+                  <i class="bi bi-people me-2"></i>Tenant Management
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'analytics_view' %}active{% endif %}"
+                  href="/analytics"
+                >
+                  <i class="bi bi-graph-up me-2"></i>Analytics
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'comparison_view' %}active{% endif %}"
+                  href="/comparison"
+                >
+                  <i class="bi bi-bar-chart-line me-2"></i>Comparison
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'detailed_dashboard' %}active{% endif %}"
+                  href="/detailed-dashboard"
+                >
+                  <i class="bi bi-graph-up me-2"></i>Detailed Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'audit_view' %}active{% endif %}"
+                  href="/audit"
+                >
+                  <i class="bi bi-shield-check me-2"></i>Audit & Compliance
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint == 'demo_view' %}active{% endif %}"
+                  href="/demo"
+                >
+                  <i class="bi bi-play-circle me-2"></i>Demo
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
 
-            <!-- Main content -->
-            <main class="col-lg-10 ms-sm-auto px-md-4 main-content">
-                <div class="pt-3">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    {% block content %}{% endblock %}
-                </div>
-            </main>
-        </div>
+        <!-- Main content -->
+        <main class="col-lg-10 ms-sm-auto px-md-4 main-content">
+          <div class="pt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %} {%
+            if messages %} {% for category, message in messages %}
+            <div
+              class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+              role="alert"
+            >
+              {{ message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+            {% endfor %} {% endif %} {% endwith %} {% block content %}{%
+            endblock %}
+          </div>
+        </main>
+      </div>
     </div>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("show");
+      }
 
-        // Auto-refresh system status every 30 seconds
-        setInterval(function() {
-            fetch('/api/system_status')
-                .then(response => response.json())
-                .then(data => {
-                    // Update real-time metrics if elements exist
-                    updateMetrics(data.system_stats);
-                })
-                .catch(error => console.log('Status update error:', error));
-        }, 30000);
+      // Auto-refresh system status every 30 seconds
+      setInterval(function () {
+        fetch("/api/system_status")
+          .then((response) => response.json())
+          .then((data) => {
+            // Update real-time metrics if elements exist
+            updateMetrics(data.system_stats);
+          })
+          .catch((error) => console.log("Status update error:", error));
+      }, 30000);
 
-        function updateMetrics(stats) {
-            const elements = {
-                'total-placements': stats.total_placements,
-                'success-rate': Math.round(stats.success_rate) + '%',
-                'compliance-score': stats.avg_compliance_score.toFixed(3),
-                'active-tenants': stats.active_tenants
-            };
+      function updateMetrics(stats) {
+        const elements = {
+          "total-placements": stats.total_placements,
+          "success-rate": Math.round(stats.success_rate) + "%",
+          "compliance-score": stats.avg_compliance_score.toFixed(3),
+          "active-tenants": stats.active_tenants,
+        };
 
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) element.textContent = value;
-            });
-        }
+        Object.entries(elements).forEach(([id, value]) => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = value;
+        });
+      }
 
-        // Show loading spinner
-        function showLoading(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) element.style.display = 'block';
-        }
+      // Show loading spinner
+      function showLoading(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) element.style.display = "block";
+      }
 
-        function hideLoading(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) element.style.display = 'none';
-        }
+      function hideLoading(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) element.style.display = "none";
+      }
 
-        // Format numbers for display
-        function formatNumber(num, decimals = 0) {
-            return new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            }).format(num);
-        }
+      // Format numbers for display
+      function formatNumber(num, decimals = 0) {
+        return new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        }).format(num);
+      }
 
-        // Format bytes
-        function formatBytes(bytes, decimals = 1) {
-            if (bytes === 0) return '0 GB';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
-        }
+      // Format bytes
+      function formatBytes(bytes, decimals = 1) {
+        if (bytes === 0) return "0 GB";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (
+          parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) +
+          " " +
+          sizes[i]
+        );
+      }
     </script>
 
-    {% block scripts %}{% endblock %}
-</body>
+    {% block scripts %}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var runBtn = document.getElementById("run-simulation-btn");
+        if (runBtn) {
+          runBtn.addEventListener("click", function () {
+            var btn = this;
+            var spinner = btn.querySelector(".spinner-border");
+
+            // Show spinner and disable button
+            spinner.classList.remove("d-none");
+            btn.disabled = true;
+
+            // Make API call to run simulation
+            fetch("/run_simulation", { method: "POST" })
+              .then((response) => {
+                if (!response.ok) {
+                  // Throw an error to be caught by the catch block
+                  throw new Error(
+                    "Network response was not ok: " + response.statusText
+                  );
+                }
+                return response.json();
+              })
+              .then((data) => {
+                if (data.success) {
+                  // Reload the page to show new results
+                  window.location.reload();
+                } else {
+                  // Handle error
+                  alert("Error running simulation: " + data.error);
+                  // Hide spinner and enable button
+                  spinner.classList.add("d-none");
+                  btn.disabled = false;
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                alert(
+                  "An unexpected error occurred. Please check the console for details."
+                );
+                // Hide spinner and enable button
+                spinner.classList.add("d-none");
+                btn.disabled = false;
+              });
+          });
+        }
+      });
+    </script>
+    {% endblock %}
+  </body>
 </html>

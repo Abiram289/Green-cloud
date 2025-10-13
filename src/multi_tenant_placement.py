@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import hashlib
 
-from improved_ai_algorithm import ImprovedAIPlacement
+from ai_model import AIModel
 
 class ComplianceFramework(Enum):
     """Supported compliance frameworks"""
@@ -62,7 +62,7 @@ class MultiTenantVMPlacement:
     """
     
     def __init__(self):
-        self.base_ai = ImprovedAIPlacement()
+        self.base_ai = AIModel()
         self.tenant_policies: Dict[str, TenantPolicy] = {}
         self.host_security_zones: Dict[int, Set[str]] = {}
         self.compliance_host_mapping: Dict[ComplianceFramework, Set[int]] = {}
